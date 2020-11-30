@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <style>
+        #renderCanvas {
+            width: 100%;
+            height: inherit;
+            touch-action: none;
+        }
+    </style>
+
+    <meta charset="UTF-8">
+    <title>3D Renderer</title>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://preview.babylonjs.com/babylon.js"></script>
+    <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+
+</head>
+
+<body>
+    <canvas id="renderCanvas" touch-action="none"></canvas>
+
+    <script src="./clientEngine.js"></script>
+
+</body>
