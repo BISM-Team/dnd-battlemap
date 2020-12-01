@@ -9,7 +9,7 @@ const scene = new BABYLON.Scene(engine);
 
 BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING;
 
-const SCENE_ROOT = 'http://localhost:3000/assets/';
+const SCENE_ROOT = './assets/';
 const SCENE_LOC = 'scene.babylon'
 
 const time_=0.1;
