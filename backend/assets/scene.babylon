@@ -129,6 +129,6 @@
 ],
 "morphTargetManagers":[],
 "cameras":[{"name":"Camera","id":"Camera","position":[7.3589,4.9583,-6.9258],"rotation":[0.4615,-0.8149,0],"fov":0.6911,"minZ":0.1,"maxZ":100,"speed":1,"inertia":0.9,"checkCollisions":false,"applyGravity":false,"ellipsoid":[0.2,0.9,0.2],"cameraRigMode":0,"interaxial_distance":0.0637,"type":"UniversalCamera"}],"activeCameraID":"Camera",
-"lights":[{"name":"Sun","id":"Sun","type":1,"position":[3.2708,10.0402,14.0157],"direction":[-0.5579,-0.5734,-0.5999],"intensityMode":3,"intensity":4,"diffuse":[1,1,1],"specular":[1,1,1],"radius":0.125},{"name":"Sun.001","id":"Sun.001","type":1,"position":[-8.8284,10.0402,-14.8179],"direction":[0.5634,-0.5917,0.5766],"intensityMode":3,"intensity":0.5,"diffuse":[1,1,1],"specular":[1,1,1],"radius":0.125}],
+"lights":[{"name":"Sun","id":"Sun","type":1,"position":[3.2708,10.0402,14.0157],"direction":[-0.5579,-0.5734,-0.5999],"intensityMode":3,"intensity":4,"diffuse":[1,1,1],"specular":[1,1,1],"radius":0.125},{"name":"Sun.001","id":"Sun.001","type":1,"position":[-8.8284,10.0402,-14.8179],"direction":[0.5352,-0.0166,0.8446],"intensityMode":3,"intensity":0.5,"diffuse":[1,1,1],"specular":[1,1,1],"radius":0.125}],
 "shadowGenerators":[]
 }
