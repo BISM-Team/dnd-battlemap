@@ -188,19 +188,21 @@ var movingObjects = 0;
 function moveMesh(mesh, vector, scene, replicate_to_server) {
     var vec = new BABYLON.Vector3(vector[0], vector[1], vector[2]);
     if(!mesh.position.equalsWithEpsilon(vec, 0.2)) {
-        unfreeze_csm();
-        movingObjects++;
+        if(executeOnClient) {
+            unfreeze_csm();
+            movingObjects++;
 
-        const lenght = BABYLON.Vector3.Distance(mesh.position, vec);
-        const time = locationAnimation.time*lenght; //time per 1 lenght units //aka speed
-        locationAnimation.animation.setKeys( [{frame: 0, value: mesh.position}, {frame: 60, value: vec}])
-        
-        mesh.animations[0] = locationAnimation.animation;
-        scene.beginAnimation(mesh, 0, 60, false, 1/time, function() {
-            movingObjects--; 
-            if(movingObjects==0) 
-                freeze_csm();
-        });
+            const lenght = BABYLON.Vector3.Distance(mesh.position, vec);
+            const time = locationAnimation.time*lenght; //time per 1 lenght units //aka speed
+            locationAnimation.animation.setKeys( [{frame: 0, value: mesh.position}, {frame: 60, value: vec}])
+            
+            mesh.animations[0] = locationAnimation.animation;
+            scene.beginAnimation(mesh, 0, 60, false, 1/time, function() {
+                movingObjects--; 
+                if(movingObjects==0) 
+                    freeze_csm();
+            });
+        }
         if(replicate_to_server) {
             socket.emit('client-move-mesh', mesh.name, vector);
         }
