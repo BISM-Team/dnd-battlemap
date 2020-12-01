@@ -1,0 +1,11 @@
+Mesh Control:
+ - addMesh(file, location(3D point))
+ - moveMesh(mesh, location);
+ - rotateMesh(mesh, rotation);
+ - scaleMesh(mesh, scaling);
+ - removeMesh(mesh);
+ - assignTexture(mesh, texture);
+ 
+Cursor Projection:
+ - get3DProjection(position(2D screen space position));
+ - getMesh(position(2D screen space position));

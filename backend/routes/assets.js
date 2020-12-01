@@ -12,10 +12,4 @@ router.get('/:filename', async (req, res) => {
     return res.status(404).send('File not found');
 });
 
-router.get('/', async (req, res) => {
-    const file = await readFile(`./backend/assets/engine.html`);
-    if(file) { res.status(200).write(file); return res.end(); }
-    return res.status(404).send('File not found');
-});
-
 module.exports = router;
