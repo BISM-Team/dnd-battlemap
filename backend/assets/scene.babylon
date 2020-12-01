@@ -5,7 +5,7 @@
 "albedoTexture":{"name":"Arkenford.png","level":1,"hasAlpha":true,"coordinatesMode":0,"uOffset":0.5,"vOffset":0,"uScale":4,"vScale":4,"uAng":0,"vAng":0,"wAng":3.1416,"wrapU":1,"wrapV":1,"coordinatesIndex":0},"useAlphaFromAlbedoTexture":true}],
 "multiMaterials":[{"name":"scene.Multimaterial#0","id":"scene.Multimaterial#0","materials":["Material","Material.001"]}],
 "skeletons":[],
-"meshes":[{"name":"Cube.001","id":"Cube.001","materialId":"scene.Multimaterial#0","billboardMode":0,"position":[0,0.899,0],"rotation":[0,0,0],"scaling":[45.831,0.3274,42.5808],"isVisible":true,"freezeWorldMatrix":false,"isEnabled":true,"checkCollisions":true,"receiveShadows":true,"pickable":true,"tags":""
+"meshes":[{"name":"Cube.001","id":"Cube.001","materialId":"scene.Multimaterial#0","billboardMode":0,"position":[0,0.899,0],"rotation":[0,0,0],"scaling":[45.831,0.3274,39.6477],"isVisible":true,"freezeWorldMatrix":false,"isEnabled":true,"checkCollisions":true,"receiveShadows":true,"pickable":true,"tags":""
 ,"positions":[-0.7414,0.9886,-1,-0.9886,-0.9886,-1,-0.7414,-0.9886,-1,1,0.9886,-0.7414,1,-0.9886,-0.9886,1,-0.9886,-0.7414,-1,0.9886,0.7414,-1,-0.9886,0.9886,-1,-0.9886,0.7414,0.7414,0.9886,1,0.9886,-0.9886,1,0.7414,-0.9886,1,-0.9886,-1,-0.9886,-0.9886,-0.9886,-1,-1,-0.9886,-0.9886,-0.9886,0.9886,-1,-0.9886,1,-0.9886
 ,-1,0.9886,-0.9886,-0.9886,-1,0.9886,-1,-0.9886,0.9886,-0.9886,-0.9886,1,-0.9886,1,0.9886,-0.9886,0.9886,1,-1,0.9886,0.9886,0.9886,-1,-0.9886,1,-0.9886,-0.9886,0.9886,-0.9886,-1,0.9886,1,-0.9886,0.9886,0.9886,-1,1,0.9886,-0.9886,0.9886,-1,0.9886,0.9886,-0.9886,1,1,-0.9886,0.9886,0.9886,1,0.9886
 ,1,0.9886,0.9886,0.9886,0.9886,1,-0.9886,-1,-0.9886,-1,-0.9886,-0.7414,-0.9886,-1,-0.7414,-0.9886,0.9886,-1,-1,-0.9886,-0.9886,-0.9886,-0.9886,-1,-0.9886,1,0.9886,-1,0.9886,0.7414,-0.9886,1,0.7414,-0.9886,-0.9886,1,-1,0.9886,0.9886,-0.9886,0.9886,1,-0.9886,-1,0.9886,-0.7414,-0.9886,1,-0.7414,-1,0.9886
@@ -129,6 +129,6 @@
 ],
 "morphTargetManagers":[],
 "cameras":[{"name":"Camera","id":"Camera","position":[7.3589,4.9583,-6.9258],"rotation":[0.4615,-0.8149,0],"fov":0.6911,"minZ":0.1,"maxZ":100,"speed":1,"inertia":0.9,"checkCollisions":false,"applyGravity":false,"ellipsoid":[0.2,0.9,0.2],"cameraRigMode":0,"interaxial_distance":0.0637,"type":"UniversalCamera"}],"activeCameraID":"Camera",
-"lights":[{"name":"Sun","id":"Sun","type":1,"position":[3.2708,10.0402,14.0157],"direction":[-0.5579,-0.5734,-0.5999],"intensityMode":3,"intensity":2,"diffuse":[1,1,1],"specular":[1,1,1],"radius":0.125},{"name":"Sun.001","id":"Sun.001","type":1,"position":[-8.8284,10.0402,-14.8179],"direction":[0.5352,-0.0166,0.8446],"intensityMode":3,"intensity":0.5,"diffuse":[1,1,1],"specular":[1,1,1],"radius":0.125}],
+"lights":[{"name":"Sun","id":"Sun","type":1,"position":[3.2708,10.0402,14.0157],"direction":[-0.5579,-0.5734,-0.5999],"intensityMode":3,"intensity":2,"diffuse":[1,1,1],"specular":[1,1,1],"radius":0.125},{"name":"Sun.001","id":"Sun.001","type":1,"position":[-8.8284,10.0402,-14.8179],"direction":[0.7024,-0.4513,0.5505],"intensityMode":3,"intensity":0.5,"diffuse":[1,1,1],"specular":[1,1,1],"radius":0.125}],
 "shadowGenerators":[]
 }
