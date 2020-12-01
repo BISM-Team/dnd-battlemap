@@ -52,7 +52,7 @@ socket.on('remove-mesh', (name) => {
 
 socket.on('move-mesh', (name, vector) => {
     mesh = scene.getMeshByName(name);
-    moveMesh(mesh, vector, scene, false);
+    moveMesh(mesh, vector, scene, true, false);
     console.log('client mesh move');
 });
 
@@ -185,7 +185,7 @@ function unfreeze_csm() {
 }
 
 var movingObjects = 0;
-function moveMesh(mesh, vector, scene, replicate_to_server) {
+function moveMesh(mesh, vector, scene, executeOnClient, replicate_to_server) {
     var vec = new BABYLON.Vector3(vector[0], vector[1], vector[2]);
     if(!mesh.position.equalsWithEpsilon(vec, 0.2)) {
         if(executeOnClient) {
