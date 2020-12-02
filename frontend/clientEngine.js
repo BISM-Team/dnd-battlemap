@@ -71,17 +71,17 @@ scalingAnimation.animation.setEasingFunction(easingFunction);
 // drag and drop file
 {
     canvas.addEventListener('dragover', (event) => {
-    event.stopPropagation();
-    event.preventDefault();
-    // Style the drag-and-drop as a "copy file" operation.
-    event.dataTransfer.dropEffect = 'load';
+        event.stopPropagation();
+        event.preventDefault();
+        // Style the drag-and-drop as a "copy file" operation.
+        event.dataTransfer.dropEffect = 'load';
     });
 
-    canvas.addEventListener('drop', (event) => {
-    event.stopPropagation();
-    event.preventDefault();
-    const file = event.dataTransfer.files[0];
-    localUploadMesh(file);
+    canvas.addEventListener('drop', async (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+        const file = event.dataTransfer.files[0];
+        await localUploadMesh(file);
     });
 }
 
@@ -147,6 +147,7 @@ function addSceneBindings() {
 var csmGenerator = null;
 function initScene() {
     addSceneBindings();
+    scene.debugLayer.show();
     scene.collisionsEnabled = true;
 
     var camera = new BABYLON.ArcRotateCamera(CAMERA_NAME, Math.PI / 2, Math.PI / 3 , 20, new BABYLON.Vector3(0,defaultHeight,0), scene);
@@ -255,26 +256,40 @@ function moveMeshFromTo(mesh, start, end, scene, executeOnClient, replicate_to_s
     }
 }
 
-function localUploadMesh(file) {
+async function localUploadMesh(file) {
     const url = URL.createObjectURL(file);
-    BABYLON.SceneLoader.Append('', url, scene, (newScene) => {
-        const newMesh = newScene.meshes[newScene.meshes.length-1];
-        console.log(newMesh.name != TERRAIN_NAME);
-        newMesh.position = new BABYLON.Vector3(0.0, newMesh.name != TERRAIN_NAME ? defaultHeight : 0.0, 0.0);
+    console.log(url);
 
-        let name = newMesh.name;
-        newMesh.name = "tmp";
-        while(scene.getMeshByName(name) != null) {
-            let index = 0;
-            name = name + index;
-        }
-        newMesh.name = name;
-        
-        console.log(newMesh);
-        var serialized = BABYLON.SceneSerializer.SerializeMesh(newMesh)
-        serialized = 'data:' + JSON.stringify(serialized);
-        socket.emit('client-stream-mesh', serialized);
-    });
+    const result = await BABYLON.SceneLoader.ImportMeshAsync("", "", url, scene, null, '.babylon');
+    result.meshes.sort((a, b) => {return (a.name.charAt(a.name.length-1) - b.name.charAt(a.name.length-1))});
+    let newMesh = result.meshes[0];
+
+    let i=1;
+    while(i<result.meshes.length) {
+        newMesh.subMeshes[0].getRenderingMesh().addLODLevel(8*i, result.meshes[i].subMeshes[0].getRenderingMesh());
+        i++;
+    }
+    if(result.meshes.length > 1) {
+        console.log('nice');
+        newMesh.isVisible = false;
+        newMesh = newMesh.createInstance(newMesh.name + '_inst');
+    }
+
+    newMesh.position = new BABYLON.Vector3(0.0, newMesh.name != TERRAIN_NAME ? defaultHeight : 0.0, 0.0);
+
+    let name = newMesh.name;
+    newMesh.name = "tmp";
+    while(scene.getMeshByName(name) != null) {
+        let index = 0;
+        name = name + index;
+    }
+    newMesh.name = name;
+
+    console.log(scene.getMeshByName(newMesh.name));
+
+    var serialized = BABYLON.SceneSerializer.SerializeMesh(newMesh)
+    serialized = 'data:' + JSON.stringify(serialized);
+    socket.emit('client-stream-mesh', serialized);
 }
 
 function localLoadMesh(url, location, vector) {
