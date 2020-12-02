@@ -103,6 +103,7 @@ var terrainMesh = null;
 
     scene.onPointerMove = function (evt, pickResult) {
         if(moving) {
+            console.log(terrainMesh);
             const pick = scene.pickWithRay(pickResult.ray, (mesh) => { return mesh==terrainMesh; });
             if(pick.pickedMesh) {
                 pick.pickedPoint._y = startPos[1] + 0.5;
