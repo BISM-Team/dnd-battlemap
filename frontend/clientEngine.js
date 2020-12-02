@@ -23,6 +23,7 @@ scalingAnimation.animation.setEasingFunction(easingFunction);
 {
     socket.on('stream-scene', async (data) => {
         scene.dispose();
+        scene = new BABYLON.Scene(engine);
         await BABYLON.SceneLoader.AppendAsync('', data, scene);
         console.log('scene acquire client');
         initScene();
@@ -30,6 +31,7 @@ scalingAnimation.animation.setEasingFunction(easingFunction);
 
     socket.on('load-scene', async (url, location) => {
         scene.dispose();
+        scene = new BABYLON.Scene(engine);
         await BABYLON.SceneLoader.AppendAsync(url, location, scene);
         console.log('scene load client')
         initScene();
