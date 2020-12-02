@@ -92,7 +92,9 @@ var terrainMesh = null;
 
     scene.onPointerDown = function (evt, pickResult) {
         // We try to pick an object
+        console.log('pick')
         if (pickResult.hit && (pickResult.pickedMesh != terrainMesh)) {
+            console.log('picked');
             moving = true;
             pickedMesh = pickResult.pickedMesh;
             startPos = [pickedMesh.position._x, pickedMesh.position._y, pickedMesh.position._z];
