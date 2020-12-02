@@ -85,7 +85,7 @@ var defaultHeight = 2.0;
 var terrainMesh = null;
 
 // input controls
-{
+function addSceneBindings() {
     var pickedMesh = null;
     var startPos = null;
     var moving = false;
@@ -142,6 +142,7 @@ var terrainMesh = null;
 
 var csmGenerator = null;
 function initScene() {
+    addSceneBindings();
     terrainMesh = scene.getMeshByName('Cube.001');
     scene.collisionsEnabled = true;
 
