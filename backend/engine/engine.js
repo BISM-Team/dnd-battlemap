@@ -26,7 +26,7 @@ exports.registerIo = async function registerIo(io_) {
     var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0.8, 100, BABYLON.Vector3.Zero(), scene);
 
     try {
-        BABYLON.SceneLoader.Append(SCENE_ROOT, SCENE_LOC, scene);
+        await BABYLON.SceneLoader.AppendAsync(SCENE_ROOT, SCENE_LOC, scene);
     } catch(ex) {
         console.error(`Could not load scene at ${SCENE_ROOT}${SCENE_LOC}`, ex);
     }
@@ -42,39 +42,35 @@ exports.registerIo = async function registerIo(io_) {
         socket.emit('stream-anim', locationAnimation, rotationAnimation, scalingAnimation);
 
         // stream from client
-        socket.on('client-stream-mesh', (mesh, filename) => { //to substitute with filestream (?)
-            BABYLON.SceneLoader.Append('', mesh, scene, () => {
-                //if(filename == '') throw 400;
-                //const stream = fs.createWriteStream(`./backend/assets/${filename}`);
-                //mesh.pipe(stream);
-                socket.broadcast.emit('stream-mesh', mesh);
-                console.log('mesh streamed (added)');
-            });
+        socket.on('client-stream-mesh', async (mesh) => {
+            socket.broadcast.emit('stream-mesh', mesh);
+            await BABYLON.SceneLoader.AppendAsync('', mesh, scene);
+            //if(filename == '') throw 400;
+            //const stream = fs.createWriteStream(`./backend/assets/${filename}`);
+            //mesh.pipe(stream);
+            console.log('mesh streamed (added)' + scene.meshes[scene.meshes.lenght-1]);
         });
 
         // load from server's fs
-        socket.on('client-load-mesh', (url, location, vector) => {
-            BABYLON.SceneLoader.ImportMesh(url, location, scene, () => {
-                socket.broadcast.emit('load-mesh', url, location, vector);
-                console.log('mesh loaded');
-            }
-            ).position = new BABYLON.Vector3(vector[0], vector[1], vector[2]);
+        socket.on('client-load-mesh', async (url, location, vector) => {
+            socket.broadcast.emit('load-mesh', url, location);
+            await BABYLON.SceneLoader.ImportMeshAsync(url, location, scene);
+            console.log('mesh loaded');
         });
 
         socket.on('client-remove-mesh', (name) => {
-            scene.removeMesh(scene.getMeshByName(name));
             socket.broadcast.emit('remove-mesh', name);
-            console.log('removed mesh');
+            scene.removeMesh(scene.getMeshByName(name));
+            console.log('removed mesh ' + name);
         });
 
         socket.on('client-move-mesh', (name, vector) => {
-            moveMesh(scene.getMeshByName(name), vector, scene);
             socket.broadcast.emit('move-mesh', name, vector);
-            console.log('mesh moved');
+            moveMesh(scene.getMeshByName(name), vector, scene);
+            console.log('mesh moved ' + name);
         });
     
     });
-
 }
 
 function moveMesh(mesh, vector, scene) {
