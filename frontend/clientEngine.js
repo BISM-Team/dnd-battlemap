@@ -54,6 +54,10 @@ scalingAnimation.animation.setEasingFunction(easingFunction);
         moveMesh(mesh, vector, scene, true, false);
         console.log('client mesh move');
     });
+
+    socket.on('disconnect', () => {
+        if(socket.open().disconnected) throw 404;
+    })
 }
 
 // drag and drop file
