@@ -4,6 +4,10 @@ const engine = new BABYLON.Engine(canvas, true);
 var scene = new BABYLON.Scene(engine);
 const divFps = document.getElementById("fps");
 
+const TERRAIN_NAME = 'terrain';
+const CAMERA_NAME = 'arcCamera';
+const SUN_NAME = 'Sun';
+
 BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING;
 
 window.addEventListener("resize", function() {
@@ -81,34 +85,35 @@ scalingAnimation.animation.setEasingFunction(easingFunction);
     });
 }
 
-var defaultHeight = 2.0;
-var terrainMesh = null;
+var defaultHeight = 0.6;
 
 // input controls
 function addSceneBindings() {
-    var pickedMesh = null;
-    var startPos = null;
-    var moving = false;
+    const pickHeight = 0.5;
+
+    let pickedMesh = null;
+    let startPos = null;
+    let moving = false;
 
     scene.onPointerDown = function (evt, pickResult) {
         // We try to pick an object
-        console.log('pick')
-        if (pickResult.hit && (pickResult.pickedMesh != terrainMesh)) {
-            console.log('picked');
-            moving = true;
+        if (pickResult.hit) {
             pickedMesh = pickResult.pickedMesh;
-            startPos = [pickedMesh.position._x, pickedMesh.position._y, pickedMesh.position._z];
-            const camera = scene.getCameraByName('arcCamera');
-            camera.detachControl(canvas);
+            if (pickResult.pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
+                moving = true;
+                startPos = [pickedMesh.position._x, pickedMesh.position._y, pickedMesh.position._z];
+                const camera = scene.getCameraByName(CAMERA_NAME);
+                camera.detachControl(canvas);
+            }
         }
+        else pickedMesh = null; // deselect if clicking nothing
     };
 
     scene.onPointerMove = function (evt, pickResult) {
         if(moving) {
-            console.log(terrainMesh);
-            const pick = scene.pickWithRay(pickResult.ray, (mesh) => { return mesh==terrainMesh; });
+            const pick = scene.pickWithRay(pickResult.ray, (mesh) => { return mesh!=pickedMesh; });
             if(pick.pickedMesh) {
-                pick.pickedPoint._y = startPos[1] + 0.5;
+                pick.pickedPoint._y += pickHeight;
                 pickedMesh.position = pick.pickedPoint;
             }
         }
@@ -117,20 +122,19 @@ function addSceneBindings() {
     scene.onPointerUp = function (evt, pickResult) {
         if(moving) {
             moving = false;
-            const pick = scene.pickWithRay(pickResult.ray, (mesh) => { return mesh==terrainMesh; });
-            const vec = pick.pickedMesh ? pick.pickedPoint : pickedMesh.position;
-            const endPos = [vec._x, startPos[1], vec._z];
+            const vec = pickedMesh.position;
+            const endPos = [vec._x, vec._y-pickHeight, vec._z];
             pickedMesh.position = new BABYLON.Vector3(endPos[0], endPos[1], endPos[2]);
             moveMeshFromTo(pickedMesh, startPos, endPos, scene, false, true);
 
-            const camera = scene.getCameraByName('arcCamera');
+            const camera = scene.getCameraByName(CAMERA_NAME);
             camera.attachControl(canvas, true);
         }
     }
 
     const delKeyBind = 'Delete';
     canvas.addEventListener('keydown', (e) => {
-        if(e.key == delKeyBind) {
+        if(e.key == delKeyBind && pickedMesh) {
             remove_mesh(pickedMesh);
             pickedMesh = null;
             moving = false;
@@ -143,11 +147,10 @@ function addSceneBindings() {
 var csmGenerator = null;
 function initScene() {
     addSceneBindings();
-    terrainMesh = scene.getMeshByName('Cube.001');
     scene.collisionsEnabled = true;
 
-    var camera = new BABYLON.ArcRotateCamera("arcCamera", Math.PI / 2, Math.PI / 3 , 20, new BABYLON.Vector3(0,defaultHeight,0), scene);
-    scene.setActiveCameraByName('arcCamera');
+    var camera = new BABYLON.ArcRotateCamera(CAMERA_NAME, Math.PI / 2, Math.PI / 3 , 20, new BABYLON.Vector3(0,defaultHeight,0), scene);
+    scene.setActiveCameraByName(CAMERA_NAME);
     camera.attachControl(canvas, true);
 
     camera.lowerRadiusLimit = 5;
@@ -161,7 +164,7 @@ function initScene() {
     ambientLight_Up_Down.intensity = 0.3;
     ambientLight_Down_Up.intensity = 0.3;
 
-    var light = scene.getNodeByName('Sun');
+    var light = scene.getNodeByName(SUN_NAME);
     //csmGenerator =  new BABYLON.CascadedShadowGenerator(2048, light);
     //csmGenerator.getShadowMap().renderList = scene.meshes;
     freeze_csm();
@@ -256,7 +259,8 @@ function localUploadMesh(file) {
     const url = URL.createObjectURL(file);
     BABYLON.SceneLoader.Append('', url, scene, (newScene) => {
         const newMesh = newScene.meshes[newScene.meshes.length-1];
-        newMesh.position = new BABYLON.Vector3(0.0, defaultHeight, 0.0);
+        console.log(newMesh.name != TERRAIN_NAME);
+        newMesh.position = new BABYLON.Vector3(0.0, newMesh.name != TERRAIN_NAME ? defaultHeight : 0.0, 0.0);
 
         let name = newMesh.name;
         newMesh.name = "tmp";
@@ -281,6 +285,6 @@ function localLoadMesh(url, location, vector) {
 }
 
 function remove_mesh(mesh) {
-    scene.removeMesh(mesh);
     socket.emit('client-remove-mesh', mesh.name);
+    scene.removeMesh(mesh);
 }
