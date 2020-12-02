@@ -8,6 +8,18 @@
             height: inherit;
             touch-action: none;
         }
+        #fps {
+            position: absolute;
+            background-color: black;
+            border: 2px solid red;
+            text-align: center;
+            font-size: 16px;
+            color: white;
+            top: 15px;
+            right: 10px;
+            width: 60px;
+            height: 20px;
+        }
     </style>
 
     <meta charset="UTF-8">
@@ -21,6 +33,7 @@
 </head>
 
 <body>
+    <div id="fps">0</div>
     <canvas id="renderCanvas" touch-action="none"></canvas>
 
     <script src="./clientEngine.js"></script>
