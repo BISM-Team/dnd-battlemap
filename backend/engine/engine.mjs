@@ -1,32 +1,28 @@
-const fs = require('fs');
+import BABYLON from 'babylonjs'
+import LOADERS from 'babylonjs-loaders'
+import xhr2 from 'xhr2'
+global.XMLHttpRequest = xhr2.XMLHttpRequest;
 
-const BABYLON = require('babylonjs/babylon.max');
-const LOADERS = require('babylonjs-loaders');
-global.XMLHttpRequest = require('xhr2').XMLHttpRequest;
+import {LocationAnimation} from '../../frontend/scripts/globals.mjs'
+import {buildLods, buildSceneLods, getLods} from '../../frontend/scripts/mesh.mjs'
 
 const engine = new BABYLON.NullEngine();
 const scene = new BABYLON.Scene(engine);
 
 BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING;
 
+var defaultHeight = 0.6;
+
 const SCENE_ROOT = `http://localhost:${process.env.PORT || 3000}/assets/`;
 const SCENE_LOC = 'scene.babylon'
 
-const time_=0.1;
-var locationAnimation = {animation: new BABYLON.Animation('move', 'position', 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3), time: time_};
-var rotationAnimation = {animation: new BABYLON.Animation('rotate', 'rotation', 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3), time: time_};
-var scalingAnimation = {animation: new BABYLON.Animation('rotate', 'scaling', 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3), time: time_};
-const easingFunction = new BABYLON.BezierCurveEase(0.4, 0.0, 0.2, 1.0);
-locationAnimation.animation.setEasingFunction(easingFunction);
-rotationAnimation.animation.setEasingFunction(easingFunction);
-scalingAnimation.animation.setEasingFunction(easingFunction);
-
-exports.registerIo = async function registerIo(io_) {
+export async function registerIo(io_) {
 
     var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0.8, 100, BABYLON.Vector3.Zero(), scene);
 
     try {
-        await BABYLON.SceneLoader.AppendAsync(SCENE_ROOT, SCENE_LOC, scene);
+        const newScene = await BABYLON.SceneLoader.AppendAsync(SCENE_ROOT, SCENE_LOC, scene);
+        buildSceneLods(newScene);
     } catch(ex) {
         console.error(`Could not load scene at ${SCENE_ROOT}${SCENE_LOC}`, ex);
     }
@@ -38,17 +34,21 @@ exports.registerIo = async function registerIo(io_) {
 
         var serialized = BABYLON.SceneSerializer.Serialize(scene);
         serialized = 'data:' + JSON.stringify(serialized);
-        socket.emit('stream-scene', serialized)
-        socket.emit('stream-anim', locationAnimation, rotationAnimation, scalingAnimation);
+        socket.emit('stream-scene', serialized);
+//        socket.emit('stream-anim', locationAnimation, rotationAnimation, scalingAnimation);
 
         // stream from client
-        socket.on('client-stream-mesh', async (mesh) => {
-            socket.broadcast.emit('stream-mesh', mesh);
-            await BABYLON.SceneLoader.AppendAsync('', mesh, scene);
-            //if(filename == '') throw 400;
-            //const stream = fs.createWriteStream(`./backend/assets/${filename}`);
-            //mesh.pipe(stream);
-            console.log('mesh streamed (added)' + scene.meshes[scene.meshes.lenght-1]);
+        socket.on('client-stream-mesh', async (meshes) => {
+            socket.broadcast.emit('stream-mesh', meshes);
+            let resultMeshes = [];
+            let i=0;
+            while(i<meshes.length) {
+                const result = await BABYLON.SceneLoader.ImportMeshAsync('', '', meshes[i], scene);
+                resultMeshes.push(result.meshes[0]);
+                i++;
+            }
+            buildLods(resultMeshes, scene);
+            console.log('mesh streamed (added)');
         });
 
         // load from server's fs
@@ -60,7 +60,7 @@ exports.registerIo = async function registerIo(io_) {
 
         socket.on('client-remove-mesh', (name) => {
             socket.broadcast.emit('remove-mesh', name);
-            scene.removeMesh(scene.getMeshByName(name));
+            removeMeshes(getLods(scene.getMeshByName(name), scene));
             console.log('removed mesh ' + name);
         });
 
@@ -73,9 +73,16 @@ exports.registerIo = async function registerIo(io_) {
     });
 }
 
+function removeMeshes(meshes) {
+    meshes.forEach( mesh => {
+        scene.removeMesh(mesh);
+    });
+}
+
 function moveMesh(mesh, vector, scene) {
     var vec = new BABYLON.Vector3(vector[0], vector[1], vector[2]);
     if(!mesh.position.equalsWithEpsilon(vec, 0.1)) {
+        const locationAnimation = new LocationAnimation();
         var lenght = BABYLON.Vector3.Distance(mesh.position, vec);
         var time = locationAnimation.time*lenght; //time per 1 lenght units //aka speed
         locationAnimation.animation.setKeys( [{frame: 0, value: mesh.position}, {frame: 60, value: vec}])
@@ -85,7 +92,7 @@ function moveMesh(mesh, vector, scene) {
     }
 }
 
-exports.runRenderLoop = function runRenderLoop() {
+export function runRenderLoop() {
     engine.runRenderLoop(function() {
         scene.render();
     })

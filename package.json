@@ -2,10 +2,10 @@
   "name": "DnD_Battlemap",
   "version": "1.0.0",
   "description": "",
-  "main": "./backend/app.js",
+  "main": "./backend/app.mjs",
   "scripts": {
-    "start": "node ./backend/app.js",
-    "startDev": "nodemon ./backend/app.js",
+    "start": "node ./backend/app.mjs",
+    "startDev": "nodemon ./backend/app.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

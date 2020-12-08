@@ -13,19 +13,23 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:filename', async (req, res) => {
-    const file = await readFile(`./frontend/${req.params.filename}`);
-    if(file) { res.status(200).write(file); return res.end(); }
-    return res.status(404).send('File not found');
+    const file = path.join(__dirname, '../../frontend/', req.params.filename);
+    try {
+        res.sendFile(file);
+    } catch (ex) {
+        ex = new Error(404);
+        console.log(ex);
+        throw ex;
+    }
 });
 
 router.get('/:dirname/:filename', async (req, res) => {
+    const file = path.join(__dirname, '../../frontend/', req.params.dirname, '/', req.params.filename);
     try {
-        const file = await readFile(`./frontend/${req.params.dirname}/${req.params.filename}`);
-        if(file) { res.status(200).write(file); return res.end(); }
-        else throw new Error();
-    } catch(ex) {
-        console.error(`${req.params.filename} not found`);
-        return res.status(404).send(`${req.params.filename} not found`);
+        res.sendFile(file);
+    } catch (ex) {
+        ex = new Error(404);
+        throw ex;
     }
 });
 

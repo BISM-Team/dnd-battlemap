@@ -14,8 +14,8 @@
         }
         #fps {
             position: absolute;
-            background-color: black;
-            border: 2px solid red;
+            background-color: rgb(0, 0, 0, 0);
+            border: none;
             text-align: center;
             font-size: 16px;
             color: white;
@@ -40,5 +40,5 @@
     <div id="fps">0</div>
     <canvas id="renderCanvas" touch-action="none"></canvas>
 
-    <script src="./clientEngine.js"></script>
+    <script type="module" src="./clientEngine.mjs"></script>
 </body>

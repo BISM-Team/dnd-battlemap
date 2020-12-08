@@ -7,8 +7,12 @@ const error = require('../middleware/error');
 const responseTime = require('express-response-time');
 
 module.exports = function(app) {
+    app.use((req, res, next) => {
+        console.log(req.method + ' ' + req.originalUrl);
+        next();
+    })
     app.use(responseTime((method, url, time) => {
-        console.log(`${method} ${url} ${time}ms`)
+        //console.log(`${method} ${url} ${time}ms`)
     }));
 
 //    app.use(allow_CORS);
