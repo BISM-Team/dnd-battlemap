@@ -16,7 +16,6 @@ let csmGenerator = null;
 export function initScene() {
     buildSceneLods(scene);
     addSceneBindings(scene);
-    scene.debugLayer.show();
     scene.collisionsEnabled = true;
 
     var camera = new BABYLON.ArcRotateCamera(CAMERA_NAME, Math.PI / 2, Math.PI / 3 , 20, new BABYLON.Vector3(0,defaultHeight,0), scene);
@@ -172,4 +171,15 @@ export function removeMeshes(meshes, replicate_to_server) {
 
 export function toggleShowFps() {
     divFps.hidden = !divFps.hidden;
+}
+
+let showDebug = false;
+export function toggleShowDebug() {
+    if(showDebug) {
+        scene.debugLayer.hide();
+        showDebug = false;
+    } else {
+        scene.debugLayer.show();
+        showDebug = true;
+    }
 }

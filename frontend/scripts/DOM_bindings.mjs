@@ -1,4 +1,4 @@
-import {engine, canvas, localUploadMesh, moveMeshFromTo, removeMeshes, toggleShowFps} from './scene.mjs'
+import {engine, canvas, localUploadMesh, moveMeshFromTo, removeMeshes, toggleShowFps, toggleShowDebug} from './scene.mjs'
 import {TERRAIN_NAME, CAMERA_NAME} from './globals.mjs'
 import {getLods} from './mesh.mjs'
 
@@ -61,6 +61,7 @@ export function addSceneBindings(scene) {
 
     const delKeyBind = 'Delete';
     const showFpsKeyBind = 'f';
+    const showDebugKeyBind = 'B';
     canvas.addEventListener('keydown', (e) => {
         switch(e.key) 
         {
@@ -74,6 +75,10 @@ export function addSceneBindings(scene) {
 
             case showFpsKeyBind:
                 toggleShowFps();
+                break;
+
+            case showDebugKeyBind:
+                toggleShowDebug();
                 break;
 
             default:
