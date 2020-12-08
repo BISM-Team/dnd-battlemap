@@ -36,7 +36,7 @@ export function buildLods(meshes, scene) {
 
     let i=1;
     while (i<meshes.length) {
-        newMesh.subMeshes[0].getRenderingMesh().addLODLevel(12*i, meshes[i].subMeshes[0].getRenderingMesh());
+        newMesh.subMeshes[0].getRenderingMesh().addLODLevel(16*i, meshes[i].subMeshes[0].getRenderingMesh());
         meshes[i].subMeshes[0].getRenderingMesh().isVisible = true;
         i++;
     }
