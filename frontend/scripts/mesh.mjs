@@ -1,19 +1,21 @@
 export function buildSceneLods(scene) {
     let i=0;
-    const persued = [];
+    let persued = [];
     while (i<scene.meshes.length) 
     {
-        if(!persued.find( elem => { return elem == scene.meshes[i]; })) 
+        if(!persued.find( elem => { return elem === scene.meshes[i].name; })) 
         {
             const meshes = getLods(scene.meshes[i], scene);
-            persued.push(meshes);
+            for(let n in meshes) {
+                persued.push(meshes[n].name);
+            }
 
             if(meshes.length > 1) {
                 meshes.sort((a, b) => {return a.name.charAt(a.name.length-1) - b.name.charAt(a.name.length-1)});
                 buildLods(meshes, scene);
             }
-            i++;
         }
+        i++;
     }
 }
 
@@ -21,7 +23,7 @@ export function getLods(mesh, scene) {
     const meshes = [mesh];
     let n=0;
     while (n<scene.meshes.length) {
-        if((scene.meshes[n].name != mesh.name) && (scene.meshes[n].name.length == mesh.name.length) && (scene.meshes[n].name.substr(0, -1) == mesh.name.substr(0, -1)) ) {
+        if((scene.meshes[n].name != mesh.name) && (scene.meshes[n].name.length == mesh.name.length) && (scene.meshes[n].name.substr(0, scene.meshes[n].name.length-1) == mesh.name.substr(0, mesh.name.length-1)) ) {
             meshes.push(scene.meshes[n]);
         }
         n++;
