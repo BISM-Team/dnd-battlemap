@@ -46,6 +46,14 @@ socket.on('move-mesh', (name, vector) => {
     console.log('client mesh move' + mesh.name);
 });
 
-socket.on('disconnect', () => {
-    if(socket.open().disconnected) throw 404;
+socket.on('connect', () => {
+    console.log('connected to server')
+});
+
+socket.on('connect_error', (error) => {
+    console.error(error);
+});
+
+socket.on('disconnect', (reason) => {
+    console.error('disconnected from server:', reason);
 });

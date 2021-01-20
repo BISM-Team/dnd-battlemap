@@ -69,6 +69,10 @@ export async function registerIo(io_) {
             moveMesh(scene.getMeshByName(name), vector, scene);
             console.log('mesh moved ' + name);
         });
+
+        socket.on('disconnect', (reason) => {
+            console.error('disconnected:', reason);
+          });
     
     });
 }
