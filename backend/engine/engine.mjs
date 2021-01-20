@@ -71,7 +71,7 @@ export async function registerIo(io_) {
         });
 
         socket.on('disconnect', (reason) => {
-            console.error('disconnected:', reason);
+            console.error('client disconnected:', reason);
           });
     
     });
