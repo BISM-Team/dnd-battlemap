@@ -88,7 +88,7 @@ function moveMesh(mesh, vector, scene) {
     if(!mesh.position.equalsWithEpsilon(vec, 0.1)) {
         const locationAnimation = new LocationAnimation();
         var lenght = BABYLON.Vector3.Distance(mesh.position, vec);
-        var time = locationAnimation.time*lenght; //time per 1 lenght units //aka speed
+        var time = pow(locationAnimation.time*lenght, 1/2); //time per 1 lenght units //aka speed
         locationAnimation.animation.setKeys( [{frame: 0, value: mesh.position}, {frame: 60, value: vec}])
 
         mesh.animations[0] = locationAnimation.animation;

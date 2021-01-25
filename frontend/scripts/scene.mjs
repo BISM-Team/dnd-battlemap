@@ -89,7 +89,7 @@ export function moveMesh(mesh, vector, scene, executeOnClient, replicate_to_serv
 
             const lenght = BABYLON.Vector3.Distance(mesh.position, vec);
             const locationAnimation = new LocationAnimation();
-            const time = locationAnimation.time*lenght; //time per 1 lenght units //aka speed
+            const time = pow(locationAnimation.time*lenght, 1/2); //time per 1 lenght units //aka speed
             locationAnimation.animation.setKeys( [{frame: 0, value: mesh.position}, {frame: 60, value: vec}])
             
             mesh.animations[0] = locationAnimation.animation;
@@ -115,7 +115,7 @@ export function moveMeshFromTo(mesh, start, end, scene, executeOnClient, replica
 
             const lenght = BABYLON.Vector3.Distance(_start, _end);
             const locationAnimation = new LocationAnimation();
-            const time = locationAnimation.time*lenght; //time per 1 lenght units //aka speed
+            const time = pow(locationAnimation.time*lenght, 1/2); //time per 1 lenght units //aka speed
             locationAnimation.animation.setKeys( [{frame: 0, value: _start}, {frame: 60, value: _end}])
             
             mesh.animations[0] = locationAnimation.animation;
