@@ -1,7 +1,9 @@
 import {moveMesh, removeMeshes, initScene, scene, resetScene} from './scene.mjs'
 import {buildLods, getLods} from './mesh.mjs'
 
-export const socket = io();
+export const socket = io({
+    transports: ['websocket']
+});
 
 socket.on('stream-scene', async (data) => {
     resetScene();
