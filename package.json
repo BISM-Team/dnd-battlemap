@@ -4,7 +4,7 @@
   "description": "",
   "main": "./backend/app.mjs",
   "scripts": {
-    "start": "node ./backend/app.mjs",
+    "start": "node --experimental-modules ./backend/app.mjs",
     "startDev": "nodemon ./backend/app.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
