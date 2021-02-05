@@ -11,14 +11,12 @@ const scene = new BABYLON.Scene(engine);
 
 BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING;
 
-var defaultHeight = 0.6;
-
 const SCENE_ROOT = `http://localhost:${process.env.PORT || 3000}/assets/`;
 const SCENE_LOC = 'scene.babylon'
 
 export async function registerIo(io_) {
-
-    var camera = new BABYLON.ArcRotateCamera("Camera", 0, 0.8, 100, BABYLON.Vector3.Zero(), scene);
+    
+    new BABYLON.ArcRotateCamera("Camera", 0, 0.8, 100, BABYLON.Vector3.Zero(), scene);
 
     try {
         const newScene = await BABYLON.SceneLoader.AppendAsync(SCENE_ROOT, SCENE_LOC, scene);
@@ -35,7 +33,6 @@ export async function registerIo(io_) {
         var serialized = BABYLON.SceneSerializer.Serialize(scene);
         const _serialized = 'data:' + JSON.stringify(serialized);
         socket.emit('stream-scene', _serialized);
-//        socket.emit('stream-anim', locationAnimation, rotationAnimation, scalingAnimation);
 
         // stream from client
         socket.on('client-stream-mesh', async (meshes) => {
