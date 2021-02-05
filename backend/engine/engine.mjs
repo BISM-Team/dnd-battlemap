@@ -34,8 +34,7 @@ export async function registerIo(io_) {
         const _serialized = 'data:' + JSON.stringify(serialized);
         console.log('streaming scene');
         socket.emit('stream-scene', _serialized);
-        console.log('scene streamed');
-
+        
         // stream from client
         socket.on('client-stream-mesh', async (meshes) => {
             socket.broadcast.emit('stream-mesh', meshes);
