@@ -12,7 +12,7 @@ module.exports = function(app) {
         next();
     })
     app.use(responseTime((method, url, time) => {
-        //console.log(`${method} ${url} ${time}ms`)
+        console.log(`in ${time}ms`)
     }));
 
 //    app.use(allow_CORS);
@@ -29,9 +29,4 @@ function allow_CORS(req, res, next) {
     res.header('Access-Control-Expose-Headers', 'x-auth-token');
     if(req.method === 'OPTIONS') return res.status(200).end();
     next();
-}
-
-function angularRouting(req, res, next) {
-    const f_path = path.join(__dirname, '../../', '/frontend-trial/dist/frontend-trial/index.html/');
-    res.sendFile(f_path);
 }

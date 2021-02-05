@@ -30,11 +30,11 @@ export async function registerIo(io_) {
     const io = io_;
     io.on('connect', (socket) => {
 
-        console.log('client connected');
+        console.log('client connected ');
 
         var serialized = BABYLON.SceneSerializer.Serialize(scene);
-        serialized = 'data:' + JSON.stringify(serialized);
-        socket.emit('stream-scene', serialized);
+        const _serialized = 'data:' + JSON.stringify(serialized);
+        socket.emit('stream-scene', _serialized);
 //        socket.emit('stream-anim', locationAnimation, rotationAnimation, scalingAnimation);
 
         // stream from client
