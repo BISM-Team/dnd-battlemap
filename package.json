@@ -4,8 +4,8 @@
   "description": "",
   "main": "./backend/app.mjs",
   "scripts": {
-    "start": "node --experimental-modules ./backend/app.mjs",
-    "startDev": "nodemon ./backend/app.mjs",
+    "start": "node --experimental-modules --max-old-space-size=3072 ./backend/app.mjs",
+    "startDev": "nodemon --max-old-space-size=3072 ./backend/app.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
