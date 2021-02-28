@@ -13,12 +13,20 @@
   "license": "ISC",
   "dependencies": {
     "babylonjs": "^4.2.0",
+<<<<<<< HEAD
     "babylonjs-loaders": "^4.2.0",
+=======
+    "babylonjs-loaders": "^4.1.0",
+>>>>>>> 2262a5bdfb2d960583c07d998c8e088f2cf0df0d
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "express-response-time": "0.0.6",
     "nodemon": "^2.0.7",
+<<<<<<< HEAD
     "socket.io": "^2.4.1",
+=======
+    "socket.io": "^3.1.1",
+>>>>>>> 2262a5bdfb2d960583c07d998c8e088f2cf0df0d
     "xhr2": "^0.2.1"
   }
 }
