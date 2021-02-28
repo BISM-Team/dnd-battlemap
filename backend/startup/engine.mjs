@@ -3,7 +3,7 @@ import { Server } from 'socket.io'
 
 export default function(server) {
     const io = new Server(server, {
-        maxHttpBufferSize: 1e9,
+        maxHttpBufferSize: 1e8,
         transports: ['polling', 'websocket']
     });
     engine.registerIo(io);
