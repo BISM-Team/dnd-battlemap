@@ -50,10 +50,13 @@ export function buildLods(meshes, scene) {
 
 export function uniqueRename(mesh, scene) {
     let name = mesh.name;
+    const original_name = mesh.name;
     mesh.name = "tmp";
+    let index = 0;
     while (scene.getMeshByName(name)) {
-        let index = 0;
-        name = index + name;
+        name = index + original_name;
+        index++;
     }
     mesh.name = name;
+    console.log('unique rename to: ' + scene.getMeshByName(mesh.name).name);
 }

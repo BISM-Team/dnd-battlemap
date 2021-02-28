@@ -1,51 +1,36 @@
-import {moveMesh, removeMeshes, initScene, scene, resetScene} from './scene.mjs'
-import {buildLods, getLods} from './mesh.mjs'
+import { manifest, player, SceneManifest, Object, getScene, initScene, resetScene } from './scene.mjs'
+import { Transform } from './globals.mjs'
 
 export const socket = io({
     transports: ['websocket']
 });
 
-socket.on('stream-scene', async (data) => {
+socket.on('stream-scene', async (url, new_manifest) => {
     resetScene();
-    await BABYLON.SceneLoader.AppendAsync('', data, scene);
+    await BABYLON.SceneLoader.AppendAsync('http://localhost:3000/', url, getScene());
+    if(new_manifest) {
+        new_manifest.__proto__ = SceneManifest.prototype; new_manifest.fix_protos();
+    }
+    manifest.update_all(new_manifest, getScene());
     console.log('scene acquire client');
     initScene();
 });
 
-socket.on('load-scene', async (url, location) => {
-    resetScene();
-    await BABYLON.SceneLoader.AppendAsync(url, location, scene);
-    console.log('scene load client')
-    initScene();
-});
-
-socket.on('stream-mesh', async (meshes) => {
-    let resultMeshes = [];
-    let i=0;
-    while(i<meshes.length) {
-        const result = await BABYLON.SceneLoader.ImportMeshAsync('', '', meshes[i], scene);
-        resultMeshes.push(result.meshes[0]);
-        i++;
-    }
-    buildLods(resultMeshes, scene);
-    console.log('client mesh added');
-});
-
-socket.on('load-mesh', async (url, location) => {
-    await BABYLON.SceneLoader.AppendAsync(url, location, scene);
+socket.on('load-mesh', async (name, object) => {
+    if(object) { object.__proto__ = Object.prototype; object.fix_protos(); }
+    manifest.update_single(name, object, getScene(), player);
     console.log('client mesh loaded');
 });
 
 socket.on('remove-mesh', (name) => {
-    const mesh = scene.getMeshByName(name);
-    removeMeshes(getLods(mesh, scene), false);
-    console.log('client removed mesh ' + mesh.name);
+    manifest.update_single(name, undefined, getScene(), player);
+    console.log('client removed mesh ' + name);
 });
 
-socket.on('move-mesh', (name, vector) => {
-    let mesh = scene.getMeshByName(name);
-    moveMesh(mesh, vector, scene, true, false);
-    console.log('client mesh move' + mesh.name);
+socket.on('move-mesh', (name, transform) => {
+    if(transform) { transform.__proto__ = Transform.prototype; transform.fix_protos(); }
+    manifest.update_single_move(name, transform, getScene());
+    console.log('client mesh move' + name);
 });
 
 socket.on('connect', () => {

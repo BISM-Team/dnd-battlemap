@@ -1,6 +1,5 @@
-import {engine, canvas, localUploadMesh, moveMeshFromTo, removeMeshes, toggleShowFps, toggleShowDebug} from './scene.mjs'
-import {TERRAIN_NAME, CAMERA_NAME} from './globals.mjs'
-import {getLods} from './mesh.mjs'
+import {engine, canvas, h_layer, localUploadMesh, sendMoveMeshTo, sendRemoveMesh, toggleShowFps, toggleShowDebug} from './scene.mjs'
+import {Vector, Transform, TERRAIN_NAME, CAMERA_NAME} from './globals.mjs'
 
 const pickHeight = 0.5;
 
@@ -15,16 +14,21 @@ export function addSceneBindings(scene) {
     scene.onPointerDown = function (evt, pickResult) {
         // We try to pick an object
         if (pickResult.hit) {
+            if(pickedMesh) h_layer.removeMesh(pickedMesh);
             pickedMesh = pickResult.pickedMesh;
+            h_layer.addMesh(pickedMesh, BABYLON.Color3.White());
             if (pickResult.pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
                 moving = true;
                 moved = false;
-                startPos = [pickedMesh.position._x, pickedMesh.position._y, pickedMesh.position._z];
+                startPos = new Vector(pickedMesh.position._x, pickedMesh.position._y, pickedMesh.position._z);
                 const camera = scene.getCameraByName(CAMERA_NAME);
                 camera.detachControl(canvas);
             }
         }
-        else pickedMesh = null; // deselect if clicking nothing
+        else {
+            h_layer.removeMesh(pickedMesh);
+            pickedMesh = null; // deselect if clicking nothing
+        }
     };
 
     scene.onPointerMove = function (evt, pickResult) {
@@ -43,12 +47,15 @@ export function addSceneBindings(scene) {
             moving = false;
             moved = false;
             const vec = pickedMesh.position;
-            const endPos = [vec._x, vec._y-pickHeight, vec._z];
-            pickedMesh.position = new BABYLON.Vector3(endPos[0], endPos[1], endPos[2]);
-            moveMeshFromTo(pickedMesh, startPos, endPos, scene, false, true);
+            const endPos = new Vector(vec._x, vec._y-pickHeight, vec._z);
+            pickedMesh.position = new BABYLON.Vector3(endPos.x, endPos.y, endPos.z);
+            sendMoveMeshTo(pickedMesh.name, new Transform(endPos, new Vector(0, 0, 0), new Vector(1, 1, 1)));
 
             const camera = scene.getCameraByName(CAMERA_NAME);
             camera.attachControl(canvas, true);
+            h_layer.removeMesh(pickedMesh);
+            pickedMesh = null;
+
         }
         else if(moving) {
             moving = false;
@@ -67,7 +74,8 @@ export function addSceneBindings(scene) {
         {
             case delKeyBind:
                 if(pickedMesh) {
-                    removeMeshes(getLods(pickedMesh, scene), true);
+                    h_layer.removeMesh(pickedMesh);
+                    sendRemoveMesh(pickedMesh.name);
                     pickedMesh = null;
                     moving = false;
                 }
@@ -99,11 +107,11 @@ export function addSceneBindings(scene) {
             event.dataTransfer.dropEffect = 'load';
         });
         
-        canvas.addEventListener('drop', async (event) => {
+        canvas.addEventListener('drop', (event) => {
             event.stopPropagation();
             event.preventDefault();
             const file = event.dataTransfer.files[0];
-            await localUploadMesh(file);
+            localUploadMesh(file);
         });
     }
 }
