@@ -1,9 +1,9 @@
-import {engine, canvas, h_layer, localUploadMesh, sendMoveMeshTo, sendRemoveMesh, toggleShowFps, toggleShowDebug} from './scene.mjs'
+import {engine, canvas, onPickMesh, onStartMoveMesh, onUnpickMesh, localUploadMesh, sendMoveMeshTo, sendRemoveMesh, toggleShowFps, toggleShowDebug} from './scene.mjs'
 import {Vector, Transform, TERRAIN_NAME, CAMERA_NAME} from './globals.mjs'
 
 const pickHeight = 0.5;
 
-let init = false;
+let dom_init = false;
 
 export function addSceneBindings(scene) {
     let pickedMesh = null;
@@ -14,9 +14,9 @@ export function addSceneBindings(scene) {
     scene.onPointerDown = function (evt, pickResult) {
         // We try to pick an object
         if (pickResult.hit) {
-            if(pickedMesh) h_layer.removeMesh(pickedMesh);
+            if(pickedMesh) onUnpickMesh(pickedMesh);
             pickedMesh = pickResult.pickedMesh;
-            h_layer.addMesh(pickedMesh, BABYLON.Color3.White());
+            onPickMesh(pickedMesh);
             if (pickResult.pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
                 moving = true;
                 moved = false;
@@ -26,7 +26,7 @@ export function addSceneBindings(scene) {
             }
         }
         else {
-            h_layer.removeMesh(pickedMesh);
+            onUnpickMesh(pickedMesh);
             pickedMesh = null; // deselect if clicking nothing
         }
     };
@@ -35,6 +35,7 @@ export function addSceneBindings(scene) {
         if(moving) {
             const pick = scene.pickWithRay(pickResult.ray, (mesh) => { return mesh!=pickedMesh && mesh.isPickable; });
             if(pick.pickedMesh) {
+                onStartMoveMesh(pickedMesh);
                 moved = true;
                 pick.pickedPoint._y += pickHeight;
                 pickedMesh.position = pick.pickedPoint;
@@ -53,7 +54,8 @@ export function addSceneBindings(scene) {
 
             const camera = scene.getCameraByName(CAMERA_NAME);
             camera.attachControl(canvas, true);
-            h_layer.removeMesh(pickedMesh);
+
+            onUnpickMesh(pickedMesh);
             pickedMesh = null;
 
         }
@@ -74,7 +76,7 @@ export function addSceneBindings(scene) {
         {
             case delKeyBind:
                 if(pickedMesh) {
-                    h_layer.removeMesh(pickedMesh);
+                    onUnpickMesh(pickedMesh);
                     sendRemoveMesh(pickedMesh.name);
                     pickedMesh = null;
                     moving = false;
@@ -94,8 +96,8 @@ export function addSceneBindings(scene) {
         }
     });
 
-    if(!init) {
-        init = true;
+    if(!dom_init) {
+        dom_init = true;
         window.addEventListener("resize", function() {
             engine.resize();
         });

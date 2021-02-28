@@ -2,16 +2,17 @@ export const canvas = document.getElementById("renderCanvas");
 export const engine = new BABYLON.Engine(canvas, true, { stencil: true });
 
 let scene = new BABYLON.Scene(engine);
-export var h_layer = new BABYLON.HighlightLayer("h_layer", scene);
+var h_layer = new BABYLON.HighlightLayer("h_layer", scene);
 
 export function getScene() {
     return scene;
 }
 
-import {generateManifest, defaultHeight, TERRAIN_NAME, CAMERA_NAME, SUN_NAME, LocationAnimation} from './globals.mjs'
-import {buildSceneLods, buildLods} from './mesh.mjs'
-import {socket} from './socket.mjs'
-import {addSceneBindings} from './DOM_bindings.mjs'
+import { generateManifest, defaultHeight, TERRAIN_NAME, CAMERA_NAME, SUN_NAME, LocationAnimation } from './globals.mjs'
+import { buildLods } from './mesh.mjs'
+import { socket } from './socket.mjs'
+import { addSceneBindings } from './DOM_bindings.mjs'
+
 const divFps = document.getElementById("fps");
 
 BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING;
@@ -22,7 +23,6 @@ export const player = new Player('sas');
 export const manifest = new SceneManifest();
 
 export function initScene() {
-    buildSceneLods(scene);
     addSceneBindings(scene);
     scene.collisionsEnabled = true;
 
@@ -64,14 +64,6 @@ export function resetScene() {
     h_layer = new BABYLON.HighlightLayer("h_layer", scene);
 }
 
-export function localUploadMesh(file) {
-    let reader = new FileReader();
-    let str = "";
-    reader.onload = function(event) { str += event.target.result; }
-    reader.onloadend = function(event) { socket.emit('client-stream-mesh', file.name, str); }
-    reader.readAsText(file);
-}
-
 export function moveMeshTo(mesh, end) {
     let _start = new BABYLON.Vector3(mesh.position._x, mesh.position._y, mesh.position._z);
     let _end = new BABYLON.Vector3(end.x, end.y, end.z);
@@ -86,6 +78,15 @@ export function moveMeshTo(mesh, end) {
     }
 }
 
+export function localUploadMesh(file) {
+    let reader = new FileReader();
+    let str = "";
+    reader.onload = function(event) { str += event.target.result; }
+    reader.onloadend = function(event) { 
+        socket.emit('client-stream-mesh', file.name, str); 
+    }
+    reader.readAsText(file);
+}
 
 export async function addMeshFromUrl(url, lodNames) {
     let result = (await BABYLON.SceneLoader.ImportMeshAsync('', 'http://localhost:3000/', url, scene, null, '.babylon'));
@@ -123,4 +124,27 @@ export function toggleShowDebug() {
         scene.debugLayer.show();
         showDebug = true;
     }
+}
+
+export function onPickMesh(mesh) {
+    if(mesh == scene.getMeshByName(TERRAIN_NAME)) return;
+    const meshes = manifest.getAllMeshesFromLod(mesh.name, scene);
+    meshes.forEach(_mesh => {
+        h_layer.addMesh(_mesh, BABYLON.Color3.White());
+    });
+    // add options panel
+}
+
+export function onStartMoveMesh(mesh) {
+    if(mesh == scene.getMeshByName(TERRAIN_NAME)) return;
+    // remove options panel
+}
+
+export function onUnpickMesh(mesh) {
+    if(mesh == scene.getMeshByName(TERRAIN_NAME)) return;
+    const meshes = manifest.getAllMeshesFromLod(mesh.name, scene);
+    meshes.forEach(_mesh => {
+        h_layer.removeMesh(_mesh);
+    });
+    // remove options panel
 }

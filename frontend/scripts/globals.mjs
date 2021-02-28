@@ -78,6 +78,13 @@ export function generateManifest(moveMeshTo, removeMesh, addMeshFromUrl) {
             this.viewers = viewers; 
             /* TODO show and hide lods (with animation?) */
         };
+
+        getLodMeshes(scene) {
+            let lods = [];
+            this.lodNames.forEach((lod) => { lods.push(scene.getMeshByName(lod)); });
+            return lods;
+        }
+
         fix_protos() {
             this.transform.__proto__ = Transform.prototype; this.transform.fix_protos();
             this.viewers.forEach((viewer) => { if(viewer) viewer.__proto__ = Player.prototype; });
@@ -138,10 +145,12 @@ export function generateManifest(moveMeshTo, removeMesh, addMeshFromUrl) {
             object.name = name;
             return this.scene.push(object); 
         }
+
         find(name) { return this.scene.find((object) => {return object && object.name == name;}); }
         findIndex(name) { return this.scene.findIndex((object) => {return object && object.name == name;}); }
         remove(name) { const index = this.findIndex(name); if(index != -1) { return this.scene.splice(this.findIndex(name), 1); } else console.error(name + ' not found'); }
         to_string() { let s=''; this.scene.forEach((obj) => { s+=obj.name; }); return s; }
+
         getMeshNameFromLod(lodName) { 
             let _name;
             this.scene.forEach((object) => { 
@@ -151,6 +160,10 @@ export function generateManifest(moveMeshTo, removeMesh, addMeshFromUrl) {
             if(!_name) throw new Error('lod name not found');
             return _name;
         }
+        getAllMeshesFromLod(lodName, scene) {
+            return this.find(this.getMeshNameFromLod(lodName)).getLodMeshes(scene);
+        }
+
         fix_protos() {
             this.scene.forEach((object) => { if(object) { object.__proto__ = Object.prototype; object.fix_protos(); }});
         }

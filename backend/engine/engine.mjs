@@ -38,7 +38,7 @@ export async function registerIo(io_) {
     io.on('connect', (socket) => {
 
         console.log('client connected ');
-        socket.emit('stream-scene', SCENE_LOC, manifest);
+        socket.emit('load-scene', SCENE_LOC, manifest);
         
         // stream from client
         socket.on('client-stream-mesh', async (filename, file) => {
@@ -50,6 +50,7 @@ export async function registerIo(io_) {
             new_object.name = filename;
             new_object.transform = new Transform(new Vector(0.0, defaultHeight, 0.0), new Vector(0, 0, 0), new Vector(1.0, 1.0, 1.0));
             new_object.meshUrl = `assets/${filename}`;
+
             const result = await BABYLON.SceneLoader.ImportMeshAsync('', '', `data:${file}`, scene, null, '.babylon');
             buildLods(result.meshes, scene);
             for(let i in result.meshes) {
