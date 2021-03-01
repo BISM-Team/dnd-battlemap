@@ -12,26 +12,31 @@ BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING;
 const SCENE_ROOT = `http://localhost:${process.env.PORT || 3000}/`;
 const SCENE_LOC = 'assets/scene.babylon'
 
-const engine = new BABYLON.NullEngine();
-const scene = new BABYLON.Scene(engine);
-
 const {SceneManifest, Object, Player} = generateManifest(moveMeshTo, removeMesh, () => {});
     
 const player = new Player('server');
-const manifest = new SceneManifest();
 
-export async function registerIo(io_) {
+export async function registerIo(io_, instance) {
+
+    const manifest = new SceneManifest();
+    const engine = new BABYLON.NullEngine();
+    const scene = new BABYLON.Scene(engine);
+    const room = instance.room;
+    instance.manifest = manifest;
+    instance.engine = engine;
+    instance.scene = scene;
     
     new BABYLON.ArcRotateCamera("Camera", 0, 0.8, 100, BABYLON.Vector3.Zero(), scene);
 
     try {
-        const newScene = await BABYLON.SceneLoader.AppendAsync(SCENE_ROOT, SCENE_LOC, scene);
+        await BABYLON.SceneLoader.AppendAsync(SCENE_ROOT, SCENE_LOC, scene);
     } catch(ex) {
         console.error(`Could not load scene at ${SCENE_ROOT}${SCENE_LOC}`, ex);
     }
     
     const io = io_;
     io.on('connect', (socket) => {
+        socket.join(room);
 
         console.log('client connected ');
         socket.emit('load-scene', SCENE_LOC, manifest);
@@ -56,8 +61,8 @@ export async function registerIo(io_) {
             if(result.meshes[0].name == TERRAIN_NAME) { new_object.transform.location.y = 0.0; result.meshes[0].position.y = 0.0; }
             manifest.add(new_object);
 
-            io.emit('load-mesh', new_object.name, new_object);
-            console.log('mesh streamed (added)');
+            io.to(room).emit('load-mesh', new_object.name, new_object);
+            console.log('mesh streamed ' + new_object.name);
         });
 
         socket.on('client-load-mesh', async (filename) => {
@@ -74,17 +79,18 @@ export async function registerIo(io_) {
             if(result.meshes[0].name == TERRAIN_NAME) { new_object.transform.location.y = 0.0; result.meshes[0].position.y = 0.0; }
             manifest.add(new_object);
 
-            io.emit('load-mesh', new_object.name, new_object);
+            io.to(room).emit('load-mesh', new_object.name, new_object);
+            console.log('mesh loaded ' + new_object.name);
         });
 
         socket.on('client-remove-mesh', (name) => {
-            io.emit('remove-mesh', name);
+            io.to(room).emit('remove-mesh', name);
             manifest.update_single(name, undefined, scene, player);
             console.log('removed mesh ' + name);
         });
 
         socket.on('client-move-mesh', (name, transform) => {
-            socket.broadcast.emit('move-mesh', name, transform);
+            socket.to(room).emit('move-mesh', name, transform);
             manifest.update_single_move(name, transform, scene);
             console.log('mesh moved ' + name);
         });
@@ -96,11 +102,11 @@ export async function registerIo(io_) {
     });
 }
 
-function removeMesh(mesh) {
+function removeMesh(scene, mesh) {
     scene.removeMesh(mesh);
 }
 
-export function moveMeshTo(mesh, end) {
+export function moveMeshTo(scene, mesh, end) {
     let _start = new BABYLON.Vector3(mesh.position.x, mesh.position.y, mesh.position.z);
     let _end = new BABYLON.Vector3(end.x, end.y, end.z);
     if(!_start.equalsWithEpsilon(_end, 0.2)) {
@@ -114,7 +120,7 @@ export function moveMeshTo(mesh, end) {
     }
 }
 
-export function runRenderLoop() {
+export function runRenderLoop(engine, scene) {
     engine.runRenderLoop(function() {
         scene.render();
     })

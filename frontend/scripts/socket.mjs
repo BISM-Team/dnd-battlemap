@@ -13,13 +13,13 @@ socket.on('load-scene', async (url, new_manifest) => {
         new_manifest.__proto__ = SceneManifest.prototype; new_manifest.fix_protos();
     }
     manifest.update_all(new_manifest, getScene());
-    console.log('scene load client');
+    console.log('scene load client ' + url);
 });
 
 socket.on('load-mesh', async (name, object) => {
     if(object) { object.__proto__ = Object.prototype; object.fix_protos(); }
     manifest.update_single(name, object, getScene(), player);
-    console.log('client mesh loaded');
+    console.log('client mesh loaded ' + name);
 });
 
 socket.on('remove-mesh', (name) => {
@@ -30,7 +30,7 @@ socket.on('remove-mesh', (name) => {
 socket.on('move-mesh', (name, transform) => {
     if(transform) { transform.__proto__ = Transform.prototype; transform.fix_protos(); }
     manifest.update_single_move(name, transform, getScene());
-    console.log('client mesh move' + name);
+    console.log('client mesh move ' + name);
 });
 
 socket.on('connect', () => {

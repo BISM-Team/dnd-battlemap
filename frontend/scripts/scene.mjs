@@ -64,7 +64,7 @@ export function resetScene() {
     h_layer = new BABYLON.HighlightLayer("h_layer", scene);
 }
 
-export function moveMeshTo(mesh, end) {
+export function moveMeshTo(scene, mesh, end) {
     let _start = new BABYLON.Vector3(mesh.position._x, mesh.position._y, mesh.position._z);
     let _end = new BABYLON.Vector3(end.x, end.y, end.z);
     if(!_start.equalsWithEpsilon(_end, 0.2)) {
@@ -92,7 +92,7 @@ export function sendLoadMeshFromUrl(filename) {
     socket.emit('client-load-mesh', filename);
 }
 
-export async function addMeshFromUrl(url, lodNames) {
+export async function addMeshFromUrl(scene, url, lodNames) {
     let result = (await BABYLON.SceneLoader.ImportMeshAsync('', '', url, scene, null, '.babylon'));
     buildLods(result.meshes, scene);
     for(let i in result.meshes) {
@@ -101,18 +101,20 @@ export async function addMeshFromUrl(url, lodNames) {
     console.log('client mesh loaded ' + result.meshes[0].name);
 }
 
-export function removeMesh(mesh) {
+export function removeMesh(scene, mesh) {
     scene.removeMesh(mesh);
 }
 
 export function sendMoveMeshTo(name, transform) {
     const _name = manifest.getMeshNameFromLod(name);
     socket.emit('client-move-mesh', _name, transform);
+    console.log('send move mesh '  + name);
 }
 
 export function sendRemoveMesh(name) {
     const _name = manifest.getMeshNameFromLod(name);
     socket.emit('client-remove-mesh', _name);
+    console.log('send remove mesh '  + name);
 }
 
 export function toggleShowFps() {

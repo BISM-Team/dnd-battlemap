@@ -58,5 +58,4 @@ export function uniqueRename(mesh, scene) {
         index++;
     }
     mesh.name = name;
-    console.log('unique rename to: ' + scene.getMeshByName(mesh.name).name);
 }

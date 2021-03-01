@@ -34,6 +34,7 @@ export function generateManifest(moveMeshTo, removeMesh, addMeshFromUrl) {
         transform = new Transform(0.0, 0.0, 0.0);
         meshUrl = '';
         lodNames = [];
+        visibleToAll = true;
         viewers = []; //Player
         owners = []; //Player
 
@@ -53,13 +54,13 @@ export function generateManifest(moveMeshTo, removeMesh, addMeshFromUrl) {
             console.log('move ' + this.lodNames[0]);
             const mesh = scene.getMeshByName(this.lodNames[0]);
             if(!mesh) { console.error(this.lodNames[0] + " not found"); return; }
-            moveMeshTo(mesh, transform.location); 
+            moveMeshTo(scene, mesh, transform.location); 
         }
 
         async load(scene, manifest) { 
             this.lodNames = [];
             manifest.add(this);
-            await addMeshFromUrl(this.meshUrl, this.lodNames);
+            await addMeshFromUrl(scene, this.meshUrl, this.lodNames);
             this.move(scene, this.transform);
         }
 
@@ -70,12 +71,18 @@ export function generateManifest(moveMeshTo, removeMesh, addMeshFromUrl) {
                 setTimeout(this.remove, 300, scene, manifest, 0);
                 return;
             }
-            this.lodNames.forEach((_name) => { removeMesh(scene.getMeshByName(_name)); });
+            this.lodNames.forEach((_name) => { removeMesh(scene, scene.getMeshByName(_name)); });
             manifest.remove(this.name);
         }
 
         show_hide(scene, viewers, player) { 
+            const meshes = this.getLodMeshes(scene);
             this.viewers = viewers; 
+            if(this.visibleToAll || this.viewers.find(viewer => { return viewer == player.name; })) {
+                meshes.forEach(mesh => { mesh.setEnabled(true); })
+            } else {
+                meshes.forEach(mesh => { mesh.setEnabled(false); })
+            }
             /* TODO show and hide lods (with animation?) */
         };
 
@@ -100,7 +107,9 @@ export function generateManifest(moveMeshTo, removeMesh, addMeshFromUrl) {
         constructor() {}
 
         update_single_move(name, transform, scene) {
-            this.find(name).move(scene, transform);
+            const obj = this.find(name);
+            if(!obj) console.error('Manifest entry not found');
+            else obj.move(scene, transform);
         }
 
         async update_single(name, new_object, scene, player) {
@@ -111,6 +120,8 @@ export function generateManifest(moveMeshTo, removeMesh, addMeshFromUrl) {
                     await obj.update(new_object, scene, player, this);
                 } else if(new_object !== undefined) {
                     await new_object.update(new_object, scene, player, this)
+                } else {
+                    throw console.error('Object is undefined');
                 }
             } catch(ex) {
                 this.loading--;
@@ -148,8 +159,13 @@ export function generateManifest(moveMeshTo, removeMesh, addMeshFromUrl) {
 
         find(name) { return this.scene.find((object) => {return object && object.name == name;}); }
         findIndex(name) { return this.scene.findIndex((object) => {return object && object.name == name;}); }
-        remove(name) { const index = this.findIndex(name); if(index != -1) { return this.scene.splice(this.findIndex(name), 1); } else console.error(name + ' not found'); }
-        to_string() { let s=''; this.scene.forEach((obj) => { s+=obj.name; }); return s; }
+        to_string() { let s=''; this.scene.forEach((obj) => { s+=(obj.name + '; '); }); return s; }
+
+        remove(name) { 
+            const index = this.findIndex(name); 
+            if(index != -1) { return this.scene.splice(this.findIndex(name), 1); } 
+            else console.error(name + ' not found'); 
+        }
 
         getMeshNameFromLod(lodName) { 
             let _name;
@@ -160,6 +176,7 @@ export function generateManifest(moveMeshTo, removeMesh, addMeshFromUrl) {
             if(!_name) throw new Error('lod name not found');
             return _name;
         }
+
         getAllMeshesFromLod(lodName, scene) {
             return this.find(this.getMeshNameFromLod(lodName)).getLodMeshes(scene);
         }
