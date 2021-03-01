@@ -8,10 +8,10 @@ export function getScene() {
     return scene;
 }
 
-import { generateManifest, defaultHeight, TERRAIN_NAME, CAMERA_NAME, SUN_NAME, LocationAnimation } from './globals.mjs'
-import { buildLods } from './mesh.mjs'
 import { socket } from './socket.mjs'
+import { buildLods } from './mesh.mjs'
 import { addSceneBindings } from './DOM_bindings.mjs'
+import { generateManifest, defaultHeight, TERRAIN_NAME, CAMERA_NAME, SUN_NAME, LocationAnimation } from './globals.mjs'
 
 const divFps = document.getElementById("fps");
 
@@ -88,8 +88,12 @@ export function localUploadMesh(file) {
     reader.readAsText(file);
 }
 
+export function sendLoadMeshFromUrl(filename) {
+    socket.emit('client-load-mesh', filename);
+}
+
 export async function addMeshFromUrl(url, lodNames) {
-    let result = (await BABYLON.SceneLoader.ImportMeshAsync('', 'http://localhost:3000/', url, scene, null, '.babylon'));
+    let result = (await BABYLON.SceneLoader.ImportMeshAsync('', '', url, scene, null, '.babylon'));
     buildLods(result.meshes, scene);
     for(let i in result.meshes) {
         lodNames.push(result.meshes[i].name);

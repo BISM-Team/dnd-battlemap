@@ -7,13 +7,13 @@ export const socket = io({
 
 socket.on('load-scene', async (url, new_manifest) => {
     resetScene();
-    await BABYLON.SceneLoader.AppendAsync('http://localhost:3000/', url, getScene());
+    initScene();
+    await BABYLON.SceneLoader.AppendAsync('', url, getScene());
     if(new_manifest) {
         new_manifest.__proto__ = SceneManifest.prototype; new_manifest.fix_protos();
     }
     manifest.update_all(new_manifest, getScene());
     console.log('scene load client');
-    initScene();
 });
 
 socket.on('load-mesh', async (name, object) => {
