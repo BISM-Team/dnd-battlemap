@@ -1,12 +1,8 @@
 export const canvas = document.getElementById("renderCanvas");
 export const engine = new BABYLON.Engine(canvas, true, { stencil: true });
 
-let scene = new BABYLON.Scene(engine);
+export let scene = new BABYLON.Scene(engine);
 var h_layer = new BABYLON.HighlightLayer("h_layer", scene);
-
-export function getScene() {
-    return scene;
-}
 
 import { socket } from './socket.mjs'
 import { buildLods } from './mesh.mjs'

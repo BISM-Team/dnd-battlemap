@@ -51,7 +51,6 @@ export function generateManifest(moveMeshTo, removeMesh, addMeshFromUrl) {
 
         move(scene, transform) { 
             this.transform = transform; 
-            console.log('move ' + this.lodNames[0]);
             const mesh = scene.getMeshByName(this.lodNames[0]);
             if(!mesh) { console.error(this.lodNames[0] + " not found"); return; }
             moveMeshTo(scene, mesh, transform.location); 

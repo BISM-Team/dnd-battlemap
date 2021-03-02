@@ -5,10 +5,10 @@ class Instance {
     manifest = null;
     engine = null;
     scene = null;
-    name = '';
+    room = '';
 
-    constructor(name) {
-        this.name = name;
+    constructor(room) {
+        this.room = room;
     };
 }
 
@@ -19,11 +19,14 @@ export function startIoServer(server) {
         maxHttpBufferSize: 1e8,
         transports: ['polling', 'websocket']
     });
+    engine.initIo(io);
 }
 
 export function startInstance(name) {
     const instance = new Instance(name);
-    engine.registerIo(io, instance);
-    engine.runRenderLoop(instance.engine, instance.scene);
-    return instance;
+    engine.registerInstance(instance);
+}
+
+export function stopInstance(name) {
+
 }

@@ -9,6 +9,7 @@ async function init() {
     expressJs(app);
     engineJs.startIoServer(server);
     engineJs.startInstance('default');
+    engineJs.startInstance('other');
 }
 
 init();
