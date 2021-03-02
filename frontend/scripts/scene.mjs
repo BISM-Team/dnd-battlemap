@@ -1,22 +1,19 @@
+export const {SceneManifest, Object, Player} = generateManifest(moveMeshTo, removeMesh, addMeshFromUrl);
+
 export const canvas = document.getElementById("renderCanvas");
 export const engine = new BABYLON.Engine(canvas, true, { stencil: true });
+export const player = new Player('sas');
+const divFps = document.getElementById("fps");
+BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING;
 
-export let scene = new BABYLON.Scene(engine);
-var h_layer = new BABYLON.HighlightLayer("h_layer", scene);
+export let manifest;
+export let scene;
+let h_layer;
 
 import { socket } from './socket.mjs'
 import { buildLods } from './mesh.mjs'
 import { addSceneBindings } from './DOM_bindings.mjs'
 import { generateManifest, defaultHeight, TERRAIN_NAME, CAMERA_NAME, SUN_NAME, LocationAnimation } from './globals.mjs'
-
-const divFps = document.getElementById("fps");
-
-BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING;
-
-export const {SceneManifest, Object, Player} = generateManifest(moveMeshTo, removeMesh, addMeshFromUrl);
-
-export const player = new Player('sas');
-export const manifest = new SceneManifest();
 
 export function initScene() {
     addSceneBindings(scene);
@@ -54,10 +51,31 @@ export function initScene() {
 }
 
 export function resetScene() {
-    scene.dispose();
-    h_layer.dispose();
+    manifest = new SceneManifest();
+    if(scene) scene.dispose();
+    if(h_layer) h_layer.dispose();
     scene = new BABYLON.Scene(engine);
     h_layer = new BABYLON.HighlightLayer("h_layer", scene);
+}
+
+
+export function localUploadMesh(file) {
+    let reader = new FileReader();
+    let str = "";
+    reader.onload = function(event) { str += event.target.result; }
+    reader.onloadend = function(event) { 
+        socket.emit('client-stream-mesh', file.name, str); 
+    }
+    reader.readAsText(file);
+}
+
+export async function addMeshFromUrl(scene, url, lodNames) {
+    let result = (await BABYLON.SceneLoader.ImportMeshAsync('', '', url, scene, null, '.babylon'));
+    buildLods(result.meshes, scene);
+    for(let i in result.meshes) {
+        lodNames.push(result.meshes[i].name);
+    }
+    console.log('client mesh loaded ' + result.meshes[0].name);
 }
 
 export function moveMeshTo(scene, mesh, end) {
@@ -74,31 +92,13 @@ export function moveMeshTo(scene, mesh, end) {
     }
 }
 
-export function localUploadMesh(file) {
-    let reader = new FileReader();
-    let str = "";
-    reader.onload = function(event) { str += event.target.result; }
-    reader.onloadend = function(event) { 
-        socket.emit('client-stream-mesh', file.name, str); 
-    }
-    reader.readAsText(file);
+export function removeMesh(scene, mesh) {
+    scene.removeMesh(mesh);
 }
+
 
 export function sendLoadMeshFromUrl(filename) {
     socket.emit('client-load-mesh', filename);
-}
-
-export async function addMeshFromUrl(scene, url, lodNames) {
-    let result = (await BABYLON.SceneLoader.ImportMeshAsync('', '', url, scene, null, '.babylon'));
-    buildLods(result.meshes, scene);
-    for(let i in result.meshes) {
-        lodNames.push(result.meshes[i].name);
-    }
-    console.log('client mesh loaded ' + result.meshes[0].name);
-}
-
-export function removeMesh(scene, mesh) {
-    scene.removeMesh(mesh);
 }
 
 export function sendMoveMeshTo(name, transform) {
@@ -112,6 +112,7 @@ export function sendRemoveMesh(name) {
     socket.emit('client-remove-mesh', _name);
     console.log('send remove mesh '  + name);
 }
+
 
 export function toggleShowFps() {
     divFps.hidden = !divFps.hidden;
@@ -127,6 +128,7 @@ export function toggleShowDebug() {
         showDebug = true;
     }
 }
+
 
 export function onPickMesh(mesh) {
     if(mesh == scene.getMeshByName(TERRAIN_NAME)) return;
