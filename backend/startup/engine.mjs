@@ -20,7 +20,9 @@ let io = null;
 export function startIoServer(server) {
     io = new Server(server, {
         maxHttpBufferSize: 1e8,
-        transports: ['polling', 'websocket']
+        transports: ['polling', 'websocket'],
+        pingInterval: 40000,
+        pingTimeout: 25000
     });
     engine.initIo(io);
 }
