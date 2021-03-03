@@ -1,5 +1,5 @@
 import { manifest, player, SceneManifest, Object, scene, initScene, resetScene } from './scene.mjs'
-import { Transform } from './globals.mjs'
+import { Transform } from './utils.mjs'
 
 export let socket;
 

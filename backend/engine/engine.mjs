@@ -4,7 +4,7 @@ import xhr2 from 'xhr2'
 import fs from 'fs'
 global.XMLHttpRequest = xhr2.XMLHttpRequest;
 
-import { Transform, Vector, generateManifest, LocationAnimation, defaultHeight, TERRAIN_NAME } from '../../frontend/scripts/globals.mjs'
+import { Transform, Vector, generateManifest, LocationAnimation, defaultHeight, TERRAIN_NAME } from '../../frontend/scripts/utils.mjs'
 import { buildLods } from '../../frontend/scripts/mesh.mjs'
 
 BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING;
@@ -19,7 +19,7 @@ const player = new Player('server');
 let io = null;
 let instances = [];
 
-export async function initIo(_io) {
+export function initIo(_io) {
     io=_io;
 
     io.on('connect', (socket) => {
@@ -29,25 +29,28 @@ export async function initIo(_io) {
 
     io.of("/").adapter.on('join-room', (room, id) => {
         const socket = io.of("/").sockets.get(id);
+        if(!socket || room==id) return;
+
         let instance;
         if(instance = instances.find(instance => { return instance.room == room; })) {
             onJoinRoom(instance, socket);
         } else {
-            console.error('Room not found');
+            socket.leave(room);
+            socket.disconnect(true);
+            console.error('Room not found ' + room);
         }
     });
 }
 
 export async function registerInstance(instance) {
 
+    if(instances.find(_instance => { return _instance.room == instance.room; })) {
+        return { ok: false, message: 'room already exists' };
+    }
+
     const manifest = new SceneManifest();
     const engine = new BABYLON.NullEngine();
     const scene = new BABYLON.Scene(engine);
-    instance.manifest = manifest;
-    instance.engine = engine;
-    instance.scene = scene;
-
-    instances.push(instance);
     
     new BABYLON.ArcRotateCamera("Camera", 0, 0.8, 100, BABYLON.Vector3.Zero(), scene);
 
@@ -59,7 +62,15 @@ export async function registerInstance(instance) {
 
     engine.runRenderLoop(function() {
         scene.render();
-    })
+    });
+
+    instance.manifest = manifest;
+    instance.engine = engine;
+    instance.scene = scene;
+    instances.push(instance);
+
+    console.log(instance.room + ': Room started');
+    return { ok: true, message: 'creation successful' };
 }
 
 function onJoinRoom(instance, socket) {
@@ -122,6 +133,11 @@ function onJoinRoom(instance, socket) {
         socket.to(room).emit('move-mesh', name, transform);
         manifest.update_single_move(name, transform, scene);
         console.log(instance.room +': mesh moved ' + name);
+    });
+
+    socket.on('client-update-object', (name, new_object) => {
+        if(!new_object || !manifest.find(name)) throw new Error('update undefined object, use other functions');
+        manifest.update_single(name, new_object, scene, player);
     });
 
     socket.on('disconnect', (reason) => {

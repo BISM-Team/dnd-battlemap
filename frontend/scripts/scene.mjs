@@ -13,7 +13,7 @@ let h_layer;
 import { socket } from './socket.mjs'
 import { buildLods } from './mesh.mjs'
 import { addSceneBindings } from './DOM_bindings.mjs'
-import { generateManifest, defaultHeight, TERRAIN_NAME, CAMERA_NAME, SUN_NAME, LocationAnimation } from './globals.mjs'
+import { generateManifest, defaultHeight, TERRAIN_NAME, CAMERA_NAME, SUN_NAME, LocationAnimation } from './utils.mjs'
 
 export function initScene() {
     addSceneBindings(scene);

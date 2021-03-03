@@ -1,5 +1,5 @@
 import {engine, canvas, onPickMesh, onStartMoveMesh, onUnpickMesh, localUploadMesh, sendMoveMeshTo, sendRemoveMesh, toggleShowFps, toggleShowDebug} from './scene.mjs'
-import {Vector, Transform, TERRAIN_NAME, CAMERA_NAME} from './globals.mjs'
+import {Vector, Transform, TERRAIN_NAME, CAMERA_NAME} from './utils.mjs'
 
 const pickHeight = 0.5;
 

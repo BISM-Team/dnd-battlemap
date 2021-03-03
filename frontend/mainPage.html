@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <style>
+        .container {
+            margin-top: 20%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container > .button-container {
+            margin-top: 5px;
+            padding: 4px;
+            display: flex;
+            flex-direction: row;
+        }
+        .container > .button-container > button {
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="module" src="./mainPage.mjs"></script>
+
+    <div class="container">
+        <input id="room" type="text"/>
+        <div class="button-container">
+            <button id="startRoom"> Start Room </button>
+            <button id="joinRoom"> Join Room </button>
+        </div>
+    </div>
+
+</body>

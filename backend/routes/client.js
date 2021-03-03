@@ -7,7 +7,7 @@ const router = express.Router();
 const readFile = util.promisify(fs.readFile);
 
 router.get('/', async (req, res) => {
-    const file = await readFile(`./frontend/engine.html`);
+    const file = await readFile(`./frontend/mainPage.html`);
     if(file) { res.status(200).write(file); return res.end(); }
     return res.status(404).send('File not found');
 });

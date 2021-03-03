@@ -3,13 +3,13 @@ const app = express();
 const server = app.listen(process.env.PORT || 3000, '0.0.0.0');
 
 import * as engineJs from './startup/engine.mjs'
-import expressJs from './startup/express.js'
+import expressJs from './startup/express.mjs'
 
 async function init() {
     expressJs(app);
     engineJs.startIoServer(server);
-    engineJs.startInstance('default');
-    engineJs.startInstance('other');
+/*     await engineJs.startInstance('default');
+    await engineJs.startInstance('other'); */
 }
 
 init();

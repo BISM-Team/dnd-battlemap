@@ -1,12 +1,12 @@
-const path = require('path');
-const express = require('express');
-require('express-async-errors');
-const client = require('../routes/client');
-const assets = require('../routes/assets');
-const error = require('../middleware/error');
-const responseTime = require('express-response-time');
+import express from 'express'
+import 'express-async-errors'
+import client from '../routes/client.js'
+import assets from '../routes/assets.js'
+import error from '../middleware/error.js'
+import * as engineJs from './engine.mjs'
+import responseTime from 'express-response-time'
 
-module.exports = function(app) {
+export default function(app) {
     app.use((req, res, next) => {
         console.log(req.method + ' ' + req.originalUrl);
         next();
@@ -19,6 +19,7 @@ module.exports = function(app) {
     app.use(express.json({ limit: '1mb' }));
 
     app.use('/assets', assets);
+    app.use('/rooms', engineJs.router);
     app.use('/', client);
     app.use(error);
 }
