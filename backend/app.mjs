@@ -1,3 +1,4 @@
+import 'newrelic'
 import express from 'express'
 const app = express();
 const server = app.listen(process.env.PORT || 3000, '0.0.0.0');
@@ -8,8 +9,6 @@ import expressJs from './startup/express.mjs'
 async function init() {
     expressJs(app);
     engineJs.startIoServer(server);
-/*     await engineJs.startInstance('default');
-    await engineJs.startInstance('other'); */
 }
 
 init();
