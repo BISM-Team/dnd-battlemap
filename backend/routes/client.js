@@ -17,9 +17,7 @@ router.get('/:filename', async (req, res) => {
     try {
         res.sendFile(file);
     } catch (ex) {
-        ex = new Error(404);
-        console.log(ex);
-        throw ex;
+        throw new Error('404');
     }
 });
 
@@ -28,8 +26,7 @@ router.get('/:dirname/:filename', async (req, res) => {
     try {
         res.sendFile(file);
     } catch (ex) {
-        ex = new Error(404);
-        throw ex;
+        throw new Error('404');
     }
 });
 

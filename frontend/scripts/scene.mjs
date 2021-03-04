@@ -1,5 +1,3 @@
-export const {SceneManifest, Object, Player} = generateManifest(moveMeshTo, removeMesh, addMeshFromUrl);
-
 export const canvas = document.getElementById("renderCanvas");
 export const engine = new BABYLON.Engine(canvas, true, { stencil: true });
 export const player = new Player('sas');
@@ -11,9 +9,11 @@ export let scene;
 let h_layer;
 
 import { socket } from './socket.mjs'
-import { buildLods } from './mesh.mjs'
-import { addSceneBindings } from './DOM_bindings.mjs'
-import { generateManifest, defaultHeight, TERRAIN_NAME, CAMERA_NAME, SUN_NAME, LocationAnimation } from './utils.mjs'
+import { addSceneBindings } from './input.mjs'
+import { defaultHeight, TERRAIN_NAME, CAMERA_NAME, LocationAnimation, buildLods } from './utils.mjs'
+import { generateManifest, Player, SceneManifest } from './manifest.mjs'
+
+generateManifest(moveMeshTo, removeMesh, addMeshFromUrl);
 
 export function initScene() {
     addSceneBindings(scene);
@@ -75,7 +75,6 @@ export async function addMeshFromUrl(scene, url, lodNames) {
     for(let i in result.meshes) {
         lodNames.push(result.meshes[i].name);
     }
-    console.log('client mesh loaded ' + result.meshes[0].name);
 }
 
 export function moveMeshTo(scene, mesh, end) {
@@ -94,23 +93,6 @@ export function moveMeshTo(scene, mesh, end) {
 
 export function removeMesh(scene, mesh) {
     scene.removeMesh(mesh);
-}
-
-
-export function sendLoadMeshFromUrl(filename) {
-    socket.emit('client-load-mesh', filename);
-}
-
-export function sendMoveMeshTo(name, transform) {
-    const _name = manifest.getMeshNameFromLod(name);
-    socket.emit('client-move-mesh', _name, transform);
-    console.log('send move mesh '  + name);
-}
-
-export function sendRemoveMesh(name) {
-    const _name = manifest.getMeshNameFromLod(name);
-    socket.emit('client-remove-mesh', _name);
-    console.log('send remove mesh '  + name);
 }
 
 

@@ -1,4 +1,5 @@
-import { manifest, player, SceneManifest, Object, scene, initScene, resetScene } from './scene.mjs'
+import { manifest, scene, player, initScene, resetScene } from './scene.mjs'
+import { SceneManifest, Object } from './manifest.mjs'
 import { Transform } from './utils.mjs'
 
 export let socket;
@@ -36,7 +37,7 @@ export function connectToRoom(room) {
     socket.on('move-mesh', (name, transform) => {
         if(transform) { transform.__proto__ = Transform.prototype; transform.fix_protos(); }
         manifest.update_single_move(name, transform, scene);
-        console.log('client mesh move ' + name);
+        console.log('client mesh moved ' + name);
     });
     
     socket.on('connect', () => {
@@ -50,4 +51,20 @@ export function connectToRoom(room) {
     socket.on('disconnect', (reason) => {
         console.error('disconnected from server:', reason);
     });
+}
+
+export function sendLoadMeshFromUrl(filename) {
+    socket.emit('client-load-mesh', filename);
+}
+
+export function sendMoveMeshTo(name, transform) {
+    const _name = manifest.getMeshNameFromLod(name);
+    socket.emit('client-move-mesh', _name, transform);
+    console.log('send move mesh '  + _name);
+}
+
+export function sendRemoveMesh(name) {
+    const _name = manifest.getMeshNameFromLod(name);
+    socket.emit('client-remove-mesh', _name);
+    console.log('send remove mesh '  + _name);
 }

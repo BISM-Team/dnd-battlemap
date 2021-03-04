@@ -1,5 +1,6 @@
-import {engine, canvas, onPickMesh, onStartMoveMesh, onUnpickMesh, localUploadMesh, sendMoveMeshTo, sendRemoveMesh, toggleShowFps, toggleShowDebug} from './scene.mjs'
+import {engine, canvas, onPickMesh, onStartMoveMesh, onUnpickMesh, localUploadMesh, toggleShowFps, toggleShowDebug} from './scene.mjs'
 import {Vector, Transform, TERRAIN_NAME, CAMERA_NAME} from './utils.mjs'
+import { sendRemoveMesh, sendMoveMeshTo, sendLoadMeshFromUrl } from './socket.mjs'
 
 const pickHeight = 0.5;
 
@@ -68,45 +69,42 @@ export function addSceneBindings(scene) {
         }
     }
 
-    const delKeyBind = 'Delete';
-    const showFpsKeyBind = 'f';
-    const showDebugKeyBind = 'B';
-    canvas.addEventListener('keydown', (e) => {
-        switch(e.key) 
-        {
-            case delKeyBind:
-                if(pickedMesh) {
-                    onUnpickMesh(pickedMesh);
-                    sendRemoveMesh(pickedMesh.name);
-                    pickedMesh = null;
-                    moving = false;
-                }
-                break;
-
-            case showFpsKeyBind:
-                toggleShowFps();
-                break;
-
-            case showDebugKeyBind:
-                toggleShowDebug();
-                break;
-
-            default:
-                break;
-        }
-    });
-
     if(!dom_init) {
         dom_init = true;
-        window.addEventListener("resize", function() {
-            engine.resize();
+
+        const delKeyBind = 'Delete';
+        const showFpsKeyBind = 'f';
+        const showDebugKeyBind = 'B';
+        canvas.addEventListener('keydown', (e) => {
+            switch(e.key) 
+            {
+                case delKeyBind:
+                    if(pickedMesh) {
+                        onUnpickMesh(pickedMesh);
+                        sendRemoveMesh(pickedMesh.name);
+                        pickedMesh = null;
+                        moving = false;
+                    }
+                    break;
+    
+                case showFpsKeyBind:
+                    toggleShowFps();
+                    break;
+    
+                case showDebugKeyBind:
+                    toggleShowDebug();
+                    break;
+    
+                default:
+                    break;
+            }
         });
         
         canvas.addEventListener('dragover', (event) => {
             event.stopPropagation();
             event.preventDefault();
             // Style the drag-and-drop as a "copy file" operation.
-            event.dataTransfer.dropEffect = 'load';
+            event.dataTransfer.dropEffect = 'copy';
         });
         
         canvas.addEventListener('drop', (event) => {
@@ -114,6 +112,10 @@ export function addSceneBindings(scene) {
             event.preventDefault();
             const file = event.dataTransfer.files[0];
             localUploadMesh(file);
+        });
+
+        window.addEventListener("resize", function() {
+            engine.resize();
         });
     }
 }

@@ -4,15 +4,15 @@ import xhr2 from 'xhr2'
 import fs from 'fs'
 global.XMLHttpRequest = xhr2.XMLHttpRequest;
 
-import { Transform, Vector, generateManifest, LocationAnimation, defaultHeight, TERRAIN_NAME } from '../../frontend/scripts/utils.mjs'
-import { buildLods } from '../../frontend/scripts/mesh.mjs'
+import { Transform, Vector,  LocationAnimation, defaultHeight, TERRAIN_NAME, buildLods } from '../../frontend/scripts/utils.mjs'
+import { generateManifest, Player, SceneManifest, Object } from '../../frontend/scripts/manifest.mjs'
 
 BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING;
 
 const SCENE_ROOT = `http://localhost:${process.env.PORT || 3000}/`;
 const SCENE_LOC = 'assets/scene.babylon'
 
-const {SceneManifest, Object, Player} = generateManifest(moveMeshTo, removeMesh, () => {});
+generateManifest(moveMeshTo, removeMesh, () => {});
 
 const player = new Player('server');
 

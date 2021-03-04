@@ -13,7 +13,7 @@ function startRoom() {
     }
 }
 function startRoomResListener() {
-    console.log(this.responseStatus, this.responseText);
+    console.log(this.status, this.responseText);
 }
 
 function joinRoom() {

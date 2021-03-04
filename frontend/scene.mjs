@@ -1,6 +1,6 @@
 import * as socketJs from './scripts/socket.mjs';
 import './scripts/scene.mjs';
-import './scripts/DOM_bindings.mjs';
+import './scripts/input.mjs';
 
 var queryString = location.search.substring(1);
 var a = queryString.split("|");
