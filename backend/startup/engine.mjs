@@ -7,7 +7,6 @@ export const router = express.Router();
 class Instance {
     manifest = null;
     engine = null;
-    scene = null;
     room = '';
 
     constructor(room) {

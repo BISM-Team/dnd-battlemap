@@ -4,8 +4,6 @@ const util = require('util');
 const express = require('express');
 const router = express.Router();
 
-const readFile = util.promisify(fs.readFile);
-
 const _babylon = new RegExp(/[.]*\.babylon$/);
 
 router.get('/', async (req, res) => {
@@ -17,9 +15,14 @@ router.get('/', async (req, res) => {
 })
 
 router.get('/:filename', async (req, res) => {
-    const stream = fs.createReadStream(`./backend/assets/${req.params.filename}`);
-    if(stream) { res.status(200); return stream.pipe(res); }
-    return res.status(404).send('File not found');
+    try {
+        const stream = fs.createReadStream(`./backend/assets/${req.params.filename}`);
+        if(stream) { res.status(200); return stream.pipe(res); }
+        else return res.status(404).send('File not found');
+    }
+    catch(ex) {
+        throw new Error(404);
+    }
 });
 
 module.exports = router;

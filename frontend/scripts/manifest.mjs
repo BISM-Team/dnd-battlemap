@@ -1,13 +1,7 @@
 import {Vector, Transform} from './utils.mjs'
 
-let moveMeshTo, removeMesh, addMeshFromUrl;
+import { moveMeshTo, rotateMeshTo, scaleMeshTo, removeMesh, addMeshFromUrl } from './utils.mjs'
 
-export function generateManifest(_moveMeshTo, _removeMesh, _addMeshFromUrl) {
-    moveMeshTo = _moveMeshTo;
-    removeMesh = _removeMesh;
-    addMeshFromUrl = _addMeshFromUrl;
-}
-    
 export class Player {
     constructor (name) { this.name = name; }
 }
@@ -35,10 +29,12 @@ export class Object {
     }
 
     move(scene, transform) { 
-        this.transform = transform; 
+        this.transform = transform;
         const mesh = scene.getMeshByName(this.lodNames[0]);
         if(!mesh) { console.error(this.lodNames[0] + " not found"); return; }
-        moveMeshTo(scene, mesh, transform.location); 
+        moveMeshTo(scene, mesh, transform.location);
+        rotateMeshTo(scene, mesh, transform.rotation);
+        scaleMeshTo(scene, mesh, transform.scaling);
     }
 
     async load(scene, manifest) { 
@@ -85,26 +81,28 @@ export class Object {
 
 
 export class SceneManifest {
+    _scene = null;
     scene = [];
     loading = 0;
-    constructor() {}
+    constructor(_scene) { this._scene = _scene; }
 
-    update_single_move(name, transform, scene) {
+    update_single_move(name, transform) {
         const obj = this.find(name);
         if(!obj) console.error('Manifest entry not found');
-        else obj.move(scene, transform);
+        else obj.move(this._scene, transform);
     }
 
-    async update_single(name, new_object, scene, player) {
+    async update_single(name, new_object, player) {
         this.loading++;
         try {
             let obj = undefined;
             if((obj = this.find(name)) !== undefined) {
-                await obj.update(new_object, scene, player, this);
+                await obj.update(new_object, this._scene, player, this);
             } else if(new_object !== undefined) {
-                await new_object.update(new_object, scene, player, this)
+                await new_object.update(new_object, this._scene, player, this)
             } else {
-                throw console.error('Object is undefined');
+                this.loading--;
+                return console.error('Object is undefined');
             }
         } catch(ex) {
             this.loading--;
@@ -113,12 +111,12 @@ export class SceneManifest {
         this.loading--;
     }
 
-    async update_all(new_manifest, scene, player) {
+    async update_all(new_manifest, player) {
         this.loading++;
         try {
-            const _scene = this.scene.concat(new_manifest.scene);
-                await Promise.all(_scene.map(async (object) => { 
-                    if(object) { await object.update(new_manifest.find(object.name), scene, player, this); } 
+            const __scene = this.scene.concat(new_manifest.scene);
+                await Promise.all(__scene.map(async (object) => { 
+                    if(object) { await object.update(new_manifest.find(object.name), this._scene, player, this); } 
                 }));
         } catch(ex) {
             this.loading--;
@@ -160,8 +158,8 @@ export class SceneManifest {
         return _name;
     }
 
-    getAllMeshesFromLod(lodName, scene) {
-        return this.find(this.getMeshNameFromLod(lodName)).getLodMeshes(scene);
+    getAllMeshesFromLod(lodName) {
+        return this.find(this.getMeshNameFromLod(lodName)).getLodMeshes(this._scene);
     }
 
     fix_protos() {

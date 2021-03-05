@@ -1,5 +1,3 @@
-const time_=0.1;
-
 export const TERRAIN_NAME = 'terrain';
 export const CAMERA_NAME = 'arcCamera';
 export const SUN_NAME = 'Sun';
@@ -28,25 +26,83 @@ export class Transform {
 }
 
 export class LocationAnimation {
+    animation = null;
+    time = 0.0;
     constructor () {
         this.animation = new BABYLON.Animation('move', 'position', 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3);
         this.animation.setEasingFunction(new BABYLON.BezierCurveEase(0.4, 0.0, 0.2, 1.0));
-        this.time = time_;
+        this.time = 0.1;
     }
 };
 export class RotationAnimation {
+    animation = null;
+    time = 0.0;
     constructor () {
         this.animation = new BABYLON.Animation('rotate', 'rotation', 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3);
         this.animation.setEasingFunction(new BABYLON.BezierCurveEase(0.4, 0.0, 0.2, 1.0));
-        this.time = time_;
+        this.time = 5.0;
     }
 };
 export class ScalingAnimation {
+    animation = null;
+    time = 0.0;
     constructor () {
         this.animation = new BABYLON.Animation('scale', 'scaling', 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3);
         this.animation.setEasingFunction(new BABYLON.BezierCurveEase(0.4, 0.0, 0.2, 1.0));
-        this.time = time_;
+        this.time = 1.0;
     }
+}
+
+export async function addMeshFromUrl(scene, url, lodNames) {
+    let result = (await BABYLON.SceneLoader.ImportMeshAsync('', '', url, scene, null, '.babylon'));
+    buildLods(result.meshes, scene);
+    for(let i in result.meshes) {
+        lodNames.push(result.meshes[i].name);
+    }
+}
+
+export function moveMeshTo(scene, mesh, target) {
+    let dirty = mesh.position._x != undefined; 
+    let start = new BABYLON.Vector3(dirty ? mesh.position._x : mesh.position.x, dirty ? mesh.position._y : mesh.position.y, dirty ? mesh.position._z : mesh.position.z);
+    let end = new BABYLON.Vector3(target.x, target.y, target.z);
+    if(!start.equalsWithEpsilon(end, 0.2)) {
+        const lenght = BABYLON.Vector3.Distance(start, end);
+        const locationAnimation = new LocationAnimation();
+        const time = Math.pow(locationAnimation.time*lenght, 1/2); //time per 1 lenght units //aka speed
+        locationAnimation.animation.setKeys( [{frame: 0, value: start}, {frame: 60, value: end}]);
+
+        scene.beginDirectAnimation(mesh, [locationAnimation.animation], 0, 60, false, 1/time);
+    }
+}
+
+export function rotateMeshTo(scene, mesh, target) {
+    let dirty = mesh.rotation._x != undefined; 
+    let start = new BABYLON.Vector3(dirty ? mesh.rotation._x : mesh.rotation.x, dirty ? mesh.rotation._y : mesh.rotation.y, dirty ? mesh.rotation._z : mesh.rotation.z);
+    let end = new BABYLON.Vector3(target.x, target.y, target.z);
+    if(!start.equalsWithEpsilon(end, 0.2)) {
+        const rotationAnimation = new RotationAnimation();
+        const time = rotationAnimation.time; //time per 1 lenght units //aka speed
+        rotationAnimation.animation.setKeys( [{frame: 0, value: start}, {frame: 60, value: end}])
+        
+        scene.beginDirectAnimation(mesh, [rotationAnimation.animation], 0, 60, false, 1/time);
+    }
+}
+
+export function scaleMeshTo(scene, mesh, target) {
+    let dirty = mesh.scaling._x != undefined; 
+    let start = new BABYLON.Vector3(dirty ? mesh.scaling._x : mesh.scaling.x, dirty ? mesh.scaling._y : mesh.scaling.y, dirty ? mesh.scaling._z : mesh.scaling.z);
+    let end = new BABYLON.Vector3(target.x, target.y, target.z);
+    if(!start.equalsWithEpsilon(end, 0.2)) {
+        const scalingAnimation = new ScalingAnimation();
+        const time = scalingAnimation.time; //time per 1 lenght units //aka speed
+        scalingAnimation.animation.setKeys( [{frame: 0, value: start}, {frame: 60, value: end}])
+        
+        scene.beginDirectAnimation(mesh, [scalingAnimation.animation], 0, 60, false, 1/time);
+    }
+}
+
+export function removeMesh(scene, mesh) {
+    scene.removeMesh(mesh);
 }
 
 export function buildLods(meshes, scene) {
