@@ -40,7 +40,7 @@ export class RotationAnimation {
     constructor () {
         this.animation = new BABYLON.Animation('rotate', 'rotation', 60, BABYLON.Animation.ANIMATIONTYPE_VECTOR3);
         this.animation.setEasingFunction(new BABYLON.BezierCurveEase(0.4, 0.0, 0.2, 1.0));
-        this.time = 5.0;
+        this.time = 0.5;
     }
 };
 export class ScalingAnimation {
