@@ -37,6 +37,7 @@ export function initScene(scene) {
     //imgProcessing.contrast = 5.0;
 
 /*     optimizeScene(scene);  */
+
     engine.runRenderLoop(function() {
         if(divFps) divFps.innerHTML = engine.getFps().toFixed() + " fps";
         scene.render();
