@@ -61,7 +61,7 @@ function optimizeScene(scene) {
 } */
 
 export function resetScene(scene) {
-/*     if(lastTimeout) { clearTimeout(lastTimeout); lastTimeout = undefined; } */    ù
+/*     if(lastTimeout) { clearTimeout(lastTimeout); lastTimeout = undefined; } */
     if(scene) scene.dispose();
     if(h_layer) h_layer.dispose();
 
