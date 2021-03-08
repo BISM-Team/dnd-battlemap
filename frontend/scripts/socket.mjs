@@ -56,12 +56,14 @@ export function localUploadMesh(file) {
     reader.onload = function(event) { str += event.target.result; }
     reader.onloadend = function(event) { 
         socket.emit('client-stream-mesh', file.name, str); 
+        console.log('stream-file ' + file.name);
     }
     reader.readAsText(file);
 }
 
 export function sendLoadMeshFromUrl(filename) {
     socket.emit('client-load-mesh', filename);
+    console.log('send load mesh ' + filename);
 }
 
 export function sendMoveMeshTo(lodName, transform) {

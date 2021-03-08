@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>DnD Battlemap</title>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://preview.babylonjs.com/babylon.js"></script>
+    <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+
+    <link rel="stylesheet" href="./campaign.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+
+<body>
+    <div id="container">
+        <div id="scene">
+            <div id="fps">0 fps</div>
+            <canvas id="renderCanvas" touch-action="none"></canvas>
+        </div>
+        <div id="assetPicker">
+            <button id="assetPickerShower"><i class="material-icons">arrow_left</i></button>
+            <button id="updateAssets"><i class="material-icons">refresh</i></button>
+            <ul id="assetList"></ul>
+        </div>
+    </div>
+
+    <script type="module" src="./campaign.mjs"></script>
+</body>

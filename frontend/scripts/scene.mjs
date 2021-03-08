@@ -2,6 +2,7 @@ export const canvas = document.getElementById("renderCanvas");
 export const engine = new BABYLON.Engine(canvas, true, { stencil: true });
 const divFps = document.getElementById("fps");
 BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING;
+BABYLON.Database.IDBStorageEnabled = true;
 
 let h_layer;
 
@@ -35,15 +36,35 @@ export function initScene(scene) {
     //imgProcessing.exposure = 0.5;
     //imgProcessing.contrast = 5.0;
 
+    optimizeScene(scene);
+
     engine.runRenderLoop(function() {
         if(divFps) divFps.innerHTML = engine.getFps().toFixed() + " fps";
         scene.render();
     });
 }
 
+let lastTimeout;
+function optimizeScene(scene) {
+    if(scene) {
+        BABYLON.SceneOptimizer.OptimizeAsync(scene, BABYLON.SceneOptimizerOptions.ModerateDegradationAllowed(),
+        function() {
+            console.log('Optimizer success');
+            lastTimeout = setTimeout(optimizeScene, 5000, scene);
+        // On success
+        }, function() {
+            console.log('Optimizer fail');
+            lastTimeout = setTimeout(optimizeScene, 5000, scene);
+        // FPS target not reached
+    });
+    }
+}
+
 export function resetScene(scene) {
+    if(lastTimeout) { clearTimeout(lastTimeout); lastTimeout = undefined; }
     if(scene) scene.dispose();
     if(h_layer) h_layer.dispose();
+
     const _scene = new BABYLON.Scene(engine);
     h_layer = new BABYLON.HighlightLayer("h_layer", _scene);
     return _scene;

@@ -99,8 +99,6 @@ export function addSceneBindings(scene) {
                 case rotateKeyBind:
                     if(pickedMesh) {
                         let new_y = pickedMesh.rotation._y+Math.PI/2;
-                        new_y = new_y > 2*Math.PI ? new_y-(2*Math.PI) : new_y;
-                        new_y = new_y > Math.PI ? new_y-(2*Math.PI) : new_y;
                         const new_transform = new Transform(    new Vector(pickedMesh.position._x, pickedMesh.position._y, pickedMesh.position._z),   
                                                                 new Vector(pickedMesh.rotation._x, new_y, pickedMesh.rotation._z), 
                                                                 new Vector(pickedMesh.scaling._x, pickedMesh.scaling._y, pickedMesh.scaling._z));
@@ -124,8 +122,15 @@ export function addSceneBindings(scene) {
         canvas.addEventListener('drop', (event) => {
             event.stopPropagation();
             event.preventDefault();
-            const file = event.dataTransfer.files[0];
-            localUploadMesh(file);
+            const text = event.dataTransfer.getData('text/plain');
+            if(text) {
+                // validate
+                sendLoadMeshFromUrl(text);
+            } else if(event.dataTransfer.files.length > 0) {
+                for(let file of event.dataTransfer.files) {
+                    localUploadMesh(file);
+                }
+            }
         });
 
         window.addEventListener("resize", function() {

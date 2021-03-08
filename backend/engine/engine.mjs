@@ -82,27 +82,10 @@ function onJoinRoom(instance, socket) {
     
     // stream from client
     socket.on('client-stream-mesh', async (filename, file) => {
-        let result = {};
-        const _import = async function(_result) { _result.result = await BABYLON.SceneLoader.ImportMeshAsync('', '', `data:${file}`, scene, null, '.babylon');};
-        await Promise.all([writeFile(`./backend/assets/${filename}`, file), _import(result)]);
-        result=result.result;
-        
-        const new_object = new _Object(player);
-        new_object.name = filename;
-        new_object.meshUrl = `assets/${filename}`;
-        
-        buildLods(result.meshes, scene);
-        for(let i in result.meshes) {
-            new_object.lodNames.push(result.meshes[i].name);
-        }
-        new_object.transform = new Transform(   new Vector(0.0, defaultHeight, 0.0), 
-                                                new Vector(result.meshes[0].rotation._x, result.meshes[0].rotation._y, result.meshes[0].rotation._z), 
-                                                new Vector(result.meshes[0].scaling._x, result.meshes[0].scaling._y, result.meshes[0].scaling._z));
-        if(result.meshes[0].name == TERRAIN_NAME) { new_object.transform.location.y = 0.0; result.meshes[0].position.y = 0.0; }
-        manifest.add(new_object);
-        
-        io.to(room).emit('load-mesh', new_object.name, new_object);
-        console.log(instance.room +': mesh streamed ' + new_object.name);
+        await writeFile(`./backend/assets/${filename}`, file);
+
+        io.to(room).emit('stream-file', filename);
+        console.log(instance.room +': file streamed ' + filename);
     });
 
     socket.on('client-load-mesh', async (filename) => {
@@ -110,7 +93,7 @@ function onJoinRoom(instance, socket) {
         new_object.name = filename;
         new_object.meshUrl = `assets/${filename}`;
 
-        const result = await BABYLON.SceneLoader.ImportMeshAsync('', SCENE_ROOT, `asstets/${filename}`, scene, null, '.babylon');
+        const result = await BABYLON.SceneLoader.ImportMeshAsync('', SCENE_ROOT, `assets/${filename}`, scene, null, '.babylon');
         buildLods(result.meshes, scene);
         for(let i in result.meshes) {
             new_object.lodNames.push(result.meshes[i].name);

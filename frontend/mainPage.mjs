@@ -21,7 +21,7 @@ function joinRoom() {
     document.getElementById('room').value = '';
     if(room) {
         console.log('joinRoom ' + room);
-        var win = window.open(`${window.location}scene.html?${room}`, '_blank');
+        var win = window.open(`campaign.html?${room}`);
         win.focus();
     }
 }

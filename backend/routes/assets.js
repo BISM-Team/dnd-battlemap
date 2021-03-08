@@ -4,21 +4,18 @@ const util = require('util');
 const express = require('express');
 const router = express.Router();
 
-const _babylon = new RegExp(/[.]*\.babylon$/);
+const readdir = util.promisify(fs.readdir);
+const _babylon = new RegExp(/[^.\n]*\.babylon$/);
 
 router.get('/', async (req, res) => {
-    await fs.readdir('./backend/assets', (err, files) => {
-        files = files.filter( file => { return file.match(_babylon); } );
-        if(files) res.status(400).send(files);
-        else res.status(500).send('Error')
-    });
+    const files = (await readdir('./backend/assets')).filter( file => { return file.match(_babylon); } );;
+    if(files) return res.status(200).send(files);
+    else return res.status(500).send('Error');
 })
 
 router.get('/:filename', async (req, res) => {
     try {
-        const stream = fs.createReadStream(`./backend/assets/${req.params.filename}`);
-        if(stream) { res.status(200); return stream.pipe(res); }
-        else return res.status(404).send('File not found');
+        return res.sendFile(`${path.resolve()}/backend/assets/${req.params.filename}`);
     }
     catch(ex) {
         throw new Error(404);

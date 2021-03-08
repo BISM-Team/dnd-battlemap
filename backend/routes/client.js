@@ -6,6 +6,8 @@ const router = express.Router();
 
 const readFile = util.promisify(fs.readFile);
 
+const image = new RegExp(/[^.\n]*\.(?:png|img|jpg)$/);
+
 router.get('/', async (req, res) => {
     const file = await readFile(`./frontend/mainPage.html`);
     if(file) { res.status(200).write(file); return res.end(); }
@@ -13,11 +15,13 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:filename', async (req, res) => {
+    if(req.params.filename.match(image)) return res.redirect(`/assets/${req.params.filename}`);
+
     const file = path.join(__dirname, '../../frontend/', req.params.filename);
     try {
         res.sendFile(file);
     } catch (ex) {
-        throw new Error('404');
+        throw new Error(404);
     }
 });
 
@@ -26,7 +30,7 @@ router.get('/:dirname/:filename', async (req, res) => {
     try {
         res.sendFile(file);
     } catch (ex) {
-        throw new Error('404');
+        throw new Error(404);
     }
 });
 
