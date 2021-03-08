@@ -8,6 +8,7 @@ class Instance {
     manifest = null;
     engine = null;
     room = '';
+    players = []; // Player
 
     constructor(room) {
         this.room = room;

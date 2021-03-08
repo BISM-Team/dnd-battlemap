@@ -36,15 +36,14 @@ export function initScene(scene) {
     //imgProcessing.exposure = 0.5;
     //imgProcessing.contrast = 5.0;
 
-    optimizeScene(scene);
-
+/*     optimizeScene(scene);  */
     engine.runRenderLoop(function() {
         if(divFps) divFps.innerHTML = engine.getFps().toFixed() + " fps";
         scene.render();
     });
 }
 
-let lastTimeout;
+/* let lastTimeout;
 function optimizeScene(scene) {
     if(scene) {
         BABYLON.SceneOptimizer.OptimizeAsync(scene, BABYLON.SceneOptimizerOptions.ModerateDegradationAllowed(),
@@ -58,10 +57,10 @@ function optimizeScene(scene) {
         // FPS target not reached
     });
     }
-}
+} */
 
 export function resetScene(scene) {
-    if(lastTimeout) { clearTimeout(lastTimeout); lastTimeout = undefined; }
+/*     if(lastTimeout) { clearTimeout(lastTimeout); lastTimeout = undefined; } */    ù
     if(scene) scene.dispose();
     if(h_layer) h_layer.dispose();
 
