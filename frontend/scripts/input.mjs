@@ -42,6 +42,8 @@ export function addSceneBindings(scene) {
         }
         else {
             if(pickedMesh) onUnpickMesh(pickedMesh);
+            moving = false;
+            moved = false;
             tmpPickedMesh = null;
             pickedMesh = null; // deselect if clicking nothing
         }
@@ -82,6 +84,9 @@ export function addSceneBindings(scene) {
 
             const camera = scene.getCameraByName(CAMERA_NAME);
             camera.attachControl(canvas, true);
+            onUnpickMesh(pickedMesh);
+            tmpPickedMesh = null;
+            pickedMesh = null;
         }
         else if(moving) {
             const camera = scene.getCameraByName(CAMERA_NAME);
