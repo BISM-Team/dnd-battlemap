@@ -7,7 +7,7 @@ global.XMLHttpRequest = xhr2.XMLHttpRequest;
 
 const writeFile = util.promisify(fs.writeFile);
 
-import { Transform, Vector, defaultHeight, buildLods, TERRAIN_NAME } from '../../frontend/scripts/utils.mjs'
+import { Transform, Vector, defaultHeight, buildLods, sortMeshes, TERRAIN_NAME } from '../../frontend/scripts/utils.mjs'
 import { Player, SceneManifest, Object as _Object } from '../../frontend/scripts/manifest.mjs'
 
 BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING;
@@ -94,7 +94,7 @@ function onJoinRoom(instance, socket) {
         new_object.meshUrl = `assets/${filename}`;
 
         const result = await BABYLON.SceneLoader.ImportMeshAsync('', SCENE_ROOT, `assets/${filename}`, scene, null, '.babylon');
-        buildLods(result.meshes, scene);
+        buildLods(sortMeshes(result.meshes), scene);
         for(let i in result.meshes) {
             new_object.lodNames.push(result.meshes[i].name);
         }
