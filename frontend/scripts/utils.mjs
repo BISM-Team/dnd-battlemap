@@ -55,7 +55,7 @@ export class ScalingAnimation {
 
 export async function addMeshFromUrl(scene, url, lodNames) {
     let result = (await BABYLON.SceneLoader.ImportMeshAsync('', '', url, scene, null, '.babylon'));
-    buildLods(result.meshes, scene);
+    buildLods(sortMeshes(result.meshes), scene);
     for(let i in result.meshes) {
         lodNames.push(result.meshes[i].name);
     }
@@ -92,7 +92,7 @@ export function scaleMeshTo(scene, mesh, target) {
     let dirty = mesh.scaling._x != undefined; 
     let start = new BABYLON.Vector3(dirty ? mesh.scaling._x : mesh.scaling.x, dirty ? mesh.scaling._y : mesh.scaling.y, dirty ? mesh.scaling._z : mesh.scaling.z);
     let end = new BABYLON.Vector3(target.x, target.y, target.z);
-    if(!start.equalsWithEpsilon(end, 0.2)) {
+    if(!start.equalsWithEpsilon(end, 0.01)) {
         const scalingAnimation = new ScalingAnimation();
         const time = scalingAnimation.time; //time per 1 lenght units //aka speed
         scalingAnimation.animation.setKeys( [{frame: 0, value: start}, {frame: 60, value: end}])
@@ -103,6 +103,14 @@ export function scaleMeshTo(scene, mesh, target) {
 
 export function removeMesh(scene, mesh) {
     scene.removeMesh(mesh);
+}
+
+export function sortMeshes(meshes) {
+    return meshes.sort((a, b) => { 
+        if(a.name < b.name) return -1; 
+        if(a.name > b.name) return 1;
+        return 0; 
+    });
 }
 
 export function buildLods(meshes, scene) {

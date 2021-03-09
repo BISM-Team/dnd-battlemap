@@ -10,21 +10,30 @@ const delKeyBind = 'Delete';
 const showFpsKeyBind = 'f';
 const showDebugKeyBind = 'B';
 const rotateKeyBind = 'r';
+const scaleKeyBind = 's';
+const unscaleKeyBind = 'S';
+
+const rotationChange = Math.PI/2;
+const scaleChange = 0.05;
 
 let dom_init = false;
 
 export function addSceneBindings(scene) {
     let pickedMesh = null;
+    let tmpPickedMesh = null;
     let moving = false;
     let moved = false;
 
     scene.onPointerDown = function (evt, pickResult) {
-        // We try to pick an object
         if (pickResult.hit) {
-            if(pickedMesh) onUnpickMesh(pickedMesh);
-            pickedMesh = pickResult.pickedMesh;
-            onPickMesh(pickedMesh);
-            if (pickResult.pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
+            if(pickedMesh && pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
+                tmpPickedMesh = pickResult.pickedMesh;
+            } else {
+                tmpPickedMesh = null;
+                pickedMesh = pickResult.pickedMesh;
+                onPickMesh(pickedMesh);
+            }
+            if (pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
                 moving = true;
                 moved = false;
                 const camera = scene.getCameraByName(CAMERA_NAME);
@@ -32,7 +41,8 @@ export function addSceneBindings(scene) {
             }
         }
         else {
-            onUnpickMesh(pickedMesh);
+            if(pickedMesh) onUnpickMesh(pickedMesh);
+            tmpPickedMesh = null;
             pickedMesh = null; // deselect if clicking nothing
         }
     };
@@ -50,7 +60,19 @@ export function addSceneBindings(scene) {
     }
 
     scene.onPointerUp = function (evt, pickResult) {
-        if(moving && moved) {
+        if(tmpPickedMesh && !moved) {
+            onUnpickMesh(pickedMesh);
+            pickedMesh = tmpPickedMesh;
+            tmpPickedMesh = null;
+            onPickMesh(pickedMesh);
+            if (pickResult.pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
+                moving = true;
+                moved = false;
+                const camera = scene.getCameraByName(CAMERA_NAME);
+                camera.detachControl(canvas);
+            }
+        }
+        if(pickedMesh && moved) {
             const vec = pickedMesh.position;
             const endPos = new Vector(vec._x, vec._y-pickHeight, vec._z);
             endPos.y = endPos.y > defaultHeight ? endPos.y : defaultHeight;
@@ -60,10 +82,6 @@ export function addSceneBindings(scene) {
 
             const camera = scene.getCameraByName(CAMERA_NAME);
             camera.attachControl(canvas, true);
-
-            onUnpickMesh(pickedMesh);
-            pickedMesh = null;
-
         }
         else if(moving) {
             const camera = scene.getCameraByName(CAMERA_NAME);
@@ -98,10 +116,30 @@ export function addSceneBindings(scene) {
                     
                 case rotateKeyBind:
                     if(pickedMesh) {
-                        let new_y = pickedMesh.rotation._y+Math.PI/2;
+                        let new_y = pickedMesh.rotation._y+rotationChange;
                         const new_transform = new Transform(    new Vector(pickedMesh.position._x, pickedMesh.position._y, pickedMesh.position._z),   
                                                                 new Vector(pickedMesh.rotation._x, new_y, pickedMesh.rotation._z), 
                                                                 new Vector(pickedMesh.scaling._x, pickedMesh.scaling._y, pickedMesh.scaling._z));
+                        manifest.update_single_move(manifest.getMeshNameFromLod(pickedMesh.name), new_transform);
+                        sendMoveMeshTo(pickedMesh.name, new_transform);
+                    }
+                    break;
+                
+                case scaleKeyBind:
+                    if(pickedMesh) {
+                        const new_transform = new Transform(    new Vector(pickedMesh.position._x, pickedMesh.position._y, pickedMesh.position._z),   
+                                                                new Vector(pickedMesh.rotation._x, pickedMesh.rotation._y, pickedMesh.rotation._z), 
+                                                                new Vector(pickedMesh.scaling._x+scaleChange, pickedMesh.scaling._y+scaleChange, pickedMesh.scaling._z+scaleChange));
+                        manifest.update_single_move(manifest.getMeshNameFromLod(pickedMesh.name), new_transform);
+                        sendMoveMeshTo(pickedMesh.name, new_transform);
+                    }
+                    break;
+
+                case unscaleKeyBind:
+                    if(pickedMesh) {
+                        const new_transform = new Transform(    new Vector(pickedMesh.position._x, pickedMesh.position._y, pickedMesh.position._z),   
+                                                                new Vector(pickedMesh.rotation._x, pickedMesh.rotation._y, pickedMesh.rotation._z), 
+                                                                new Vector(pickedMesh.scaling._x-scaleChange, pickedMesh.scaling._y-scaleChange, pickedMesh.scaling._z-scaleChange));
                         manifest.update_single_move(manifest.getMeshNameFromLod(pickedMesh.name), new_transform);
                         sendMoveMeshTo(pickedMesh.name, new_transform);
                     }
