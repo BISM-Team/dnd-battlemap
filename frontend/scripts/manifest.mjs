@@ -1,6 +1,4 @@
-import {Vector, Transform} from './utils.mjs'
-
-import { moveMeshTo, rotateMeshTo, scaleMeshTo, removeMesh, addMeshFromUrl } from './utils.mjs'
+import { Vector, Transform, moveMeshTo, rotateMeshTo, scaleMeshTo, removeMesh, addMeshFromUrl } from './shared.mjs'
 
 export class Player {
     constructor (name) { this.name = name; }

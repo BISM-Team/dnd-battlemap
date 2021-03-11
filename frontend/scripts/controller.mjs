@@ -1,7 +1,7 @@
 import { resetScene as _resetScene, initScene, highlightMesh, unHighlightMesh } from './scene.mjs';
 import { Player, SceneManifest } from './manifest.mjs'
 import { addSceneBindings } from './input.mjs'
-import { TERRAIN_NAME } from './utils.mjs'
+import { TERRAIN_NAME } from './shared.mjs'
 
 export let manifest;
 export const player = new Player('sas');

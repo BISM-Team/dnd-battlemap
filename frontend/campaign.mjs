@@ -1,4 +1,4 @@
-import * as socketJs from './scripts/socket.mjs';
+import * as connectionJs from './scripts/connection.mjs';
 import './scripts/scene.mjs';
 import './scripts/input.mjs';
 
@@ -14,7 +14,7 @@ var a = queryString.split("|");
 
 if(a[0]) {
     console.log('connecting to room: ' + a[0]);
-    socketJs.connectToRoom(a[0]);
+    connectionJs.connectToRoom(a[0]);
     updateAssets();
 } else {
     throw new Error('room not specified');

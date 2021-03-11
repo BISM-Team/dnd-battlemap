@@ -1,8 +1,8 @@
 import { engine, canvas, toggleShowFps, toggleShowDebug } from './scene.mjs'
-import {Vector, Transform, TERRAIN_NAME, CAMERA_NAME} from './utils.mjs'
-import { sendRemoveMesh, sendMoveMeshTo, localUploadMesh, sendLoadMeshFromUrl } from './socket.mjs'
+import { Vector, Transform, TERRAIN_NAME, CAMERA_NAME } from './shared.mjs'
+import { sendRemoveMesh, sendMoveMeshTo, localUploadMesh, sendLoadMeshFromUrl } from './connection.mjs'
 import { manifest, onPickMesh, onStartMoveMesh, onUnpickMesh } from './controller.mjs'
-import { defaultHeight } from './utils.mjs';
+import { defaultHeight } from './shared.mjs';
 
 const pickHeight = 0.5;
 

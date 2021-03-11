@@ -6,7 +6,7 @@ BABYLON.Database.IDBStorageEnabled = true;
 
 let h_layer;
 
-import { defaultHeight, CAMERA_NAME } from './utils.mjs'
+import { defaultHeight, CAMERA_NAME } from './shared.mjs'
 
 export function initScene(scene) {
     scene.collisionsEnabled = true;

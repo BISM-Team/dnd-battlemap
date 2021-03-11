@@ -9,7 +9,7 @@ export class Vector {
 
     add(other) { return new Vector(this.x+other.x, this.y+other.y, this.z+other.z); }
     difference(other) { return new Vector(this.x-other.x, this.y-other.y, this.z-other.z); }
-    lenght() { return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2)) }
+    length() { return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2)) }
 
     isEqual(other) { return this.x == other.x && this.y==other.y && this.z==other.z;}
 }
@@ -66,9 +66,9 @@ export function moveMeshTo(scene, mesh, target) {
     let start = new BABYLON.Vector3(dirty ? mesh.position._x : mesh.position.x, dirty ? mesh.position._y : mesh.position.y, dirty ? mesh.position._z : mesh.position.z);
     let end = new BABYLON.Vector3(target.x, target.y, target.z);
     if(!start.equalsWithEpsilon(end, 0.2)) {
-        const lenght = BABYLON.Vector3.Distance(start, end);
+        const length = BABYLON.Vector3.Distance(start, end);
         const locationAnimation = new LocationAnimation();
-        const time = Math.pow(locationAnimation.time*lenght, 1/2); //time per 1 lenght units //aka speed
+        const time = Math.pow(locationAnimation.time*length, 1/2); //time per 1 length units //aka speed
         locationAnimation.animation.setKeys( [{frame: 0, value: start}, {frame: 60, value: end}]);
 
         scene.beginDirectAnimation(mesh, [locationAnimation.animation], 0, 60, false, 1/time);
@@ -81,7 +81,7 @@ export function rotateMeshTo(scene, mesh, target) {
     let end = new BABYLON.Vector3(target.x, target.y, target.z);
     if(!start.equalsWithEpsilon(end, 0.2)) {
         const rotationAnimation = new RotationAnimation();
-        const time = rotationAnimation.time; //time per 1 lenght units //aka speed
+        const time = rotationAnimation.time; //time per 1 length units //aka speed
         rotationAnimation.animation.setKeys( [{frame: 0, value: start}, {frame: 60, value: end}])
         
         scene.beginDirectAnimation(mesh, [rotationAnimation.animation], 0, 60, false, 1/time);
@@ -94,7 +94,7 @@ export function scaleMeshTo(scene, mesh, target) {
     let end = new BABYLON.Vector3(target.x, target.y, target.z);
     if(!start.equalsWithEpsilon(end, 0.01)) {
         const scalingAnimation = new ScalingAnimation();
-        const time = scalingAnimation.time; //time per 1 lenght units //aka speed
+        const time = scalingAnimation.time; //time per 1 length units //aka speed
         scalingAnimation.animation.setKeys( [{frame: 0, value: start}, {frame: 60, value: end}])
         
         scene.beginDirectAnimation(mesh, [scalingAnimation.animation], 0, 60, false, 1/time);

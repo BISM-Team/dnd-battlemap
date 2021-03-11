@@ -1,16 +1,22 @@
 import { manifest, player, resetScene } from './controller.mjs'
 import { SceneManifest, Object } from './manifest.mjs'
-import { Transform } from './utils.mjs'
+import { Transform } from './shared.mjs'
 
-export let socket;
+let socket;
+
+/* Download */
 
 export function connectToRoom(room) {
+    if(socket) socket.disconnect(true);
+
     socket = io({
         transports: ['websocket'],
+        autoConnect: false,
         query: {
             'room': room
         }
     });
+    socket.connect();
 
     socket.on('load-scene', async (url, new_manifest) => {
         if(new_manifest) { new_manifest.__proto__ = SceneManifest.prototype; new_manifest.fix_protos(); }
@@ -50,12 +56,21 @@ export function connectToRoom(room) {
     });
 }
 
+/* Upload */
+
 export function localUploadMesh(file) {
     let reader = new FileReader();
     let str = "";
     reader.onload = function(event) { str += event.target.result; }
     reader.onloadend = function(event) { 
-        socket.emit('client-stream-mesh', file.name, str); 
+        const chunks = []; let i=0; const chunk_size = 1000000;
+        while(str.length > chunk_size*i) {
+            const start = chunk_size*i;
+            chunks.push(str.slice(start, Math.min(start+chunk_size, str.length)));
+            socket.emit('client-stream-mesh-chunk', file.name, i, chunks[i]);
+            ++i;
+        }
+        socket.emit('client-stream-mesh-last-chunk-index', file.name, i);
         console.log('stream-file ' + file.name);
     }
     reader.readAsText(file);
