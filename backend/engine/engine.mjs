@@ -5,8 +5,6 @@ import fs from 'fs'
 import util from 'util'
 global.XMLHttpRequest = xhr2.XMLHttpRequest;
 
-const writeFile = util.promisify(fs.writeFile);
-
 import { Transform, Vector, defaultHeight, buildLods, sortMeshes, TERRAIN_NAME } from '../../frontend/scripts/shared.mjs'
 import { Player, SceneManifest, Object as _Object } from '../../frontend/scripts/manifest.mjs'
 
@@ -72,8 +70,6 @@ export async function registerInstance(instance) {
     return { ok: true, message: 'creation successful' };
 }
 
-const fileBuffer = {};
-
 function onJoinRoom(instance, socket) {
     const manifest = instance.manifest;
     const scene = manifest._scene;
@@ -84,7 +80,7 @@ function onJoinRoom(instance, socket) {
     
     // stream from client
     socket.on('client-stream-mesh-chunk', async (filename, i, chunk) => {
-        console.log('add chunk ' + i + ' of ' + filename);
+/*         console.log('add chunk ' + i + ' of ' + filename);
         if(!fileBuffer[filename]) {
             fileBuffer[filename] = {
                 chunks: [{ i: i, chunk: chunk }],
@@ -93,11 +89,11 @@ function onJoinRoom(instance, socket) {
         } else {
             fileBuffer[filename].chunks.push({ i: i, chunk: chunk });
         }
-        await tryToFinishWrite(filename);
+        await tryToFinishWrite(filename); */
     });
 
     socket.on('client-stream-mesh-last-chunk-index', async (filename, i) => {
-        console.log('set last chunk of ' + filename + 'to ' + i);
+/*         console.log('set last chunk of ' + filename + 'to ' + i);
         if(!fileBuffer[filename]) {
             fileBuffer[filename] = {
                 chunks: [],
@@ -106,28 +102,8 @@ function onJoinRoom(instance, socket) {
         } else {
             fileBuffer[filename].last_chunk = i;
         }
-        await tryToFinishWrite(filename);
+        await tryToFinishWrite(filename); */
     });
-
-    async function tryToFinishWrite(filename) {
-        console.log('check if ' + fileBuffer[filename].chunks.length + ' != ' + fileBuffer[filename].last_chunk);
-        if(fileBuffer[filename].chunks.length != fileBuffer[filename].last_chunk) return;
-        
-        console.log('pre sort ' + fileBuffer[filename].chunks.map(chunk => chunk.i));
-        fileBuffer[filename].chunks = fileBuffer[filename].chunks.sort((a, b) => { return a.i - b.i; });
-        console.log('post sort ' + fileBuffer[filename].chunks.map(chunk => chunk.i));
-
-        let file = '';
-        fileBuffer[filename].chunks.forEach(chunk => {
-            file += chunk.chunk;
-        });
-
-        await writeFile(`./backend/assets/${filename}`, file);
-        delete fileBuffer[filename];
-
-        io.to(room).emit('stream-file', filename);
-        console.log(instance.room +': file streamed ' + filename);
-    }
 
     socket.on('client-load-mesh', async (filename) => {
         const new_object = new _Object(player);

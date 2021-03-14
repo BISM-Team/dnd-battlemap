@@ -16,6 +16,16 @@ export default function(app) {
     }));
 
 //    app.use(allow_CORS);
+    app.use(function(req, res, next){ // for text/plain, text/...
+        if (req.is('text/*')) {
+        req.text = '';
+        req.setEncoding('utf8');
+        req.on('data', function(chunk){ req.text += chunk });
+        req.on('end', next);
+        } else {
+        next();
+        }
+    });
     app.use(express.json({ limit: '1mb' }));
 
     app.use('/assets', assets);

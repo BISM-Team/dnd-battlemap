@@ -67,10 +67,24 @@ export function localUploadMesh(file) {
         while(str.length > chunk_size*i) {
             const start = chunk_size*i;
             chunks.push(str.slice(start, Math.min(start+chunk_size, str.length)));
-            socket.emit('client-stream-mesh-chunk', file.name, i, chunks[i]);
+
+            const req = new XMLHttpRequest();
+            req.open('POST', `/assets/${file.name}?i=${i}&data=${true}`);
+            req.onload = (ev => {
+                console.log(file.name + ", " +  i + ", " + this.responseText);
+            });
+            req.setRequestHeader('Content-type', 'text/plain');
+            req.send(`${chunks[i]}`);
+
+            //socket.emit('client-stream-mesh-chunk', file.name, i, chunks[i]);
             ++i;
         }
-        socket.emit('client-stream-mesh-last-chunk-index', file.name, i);
+
+        const req = new XMLHttpRequest();
+        req.open('POST', `/assets/${file.name}?i=${i}&data=${false}`);
+        req.send();
+
+        //socket.emit('client-stream-mesh-last-chunk-index', file.name, i);
         console.log('stream-file ' + file.name);
     }
     reader.readAsText(file);
