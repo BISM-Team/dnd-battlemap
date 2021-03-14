@@ -21,8 +21,8 @@ export function startIoServer(server) {
     io = new Server(server, {
         maxHttpBufferSize: 1e8,
         transports: ['polling', 'websocket'],
-        pingInterval: 40000,
-        pingTimeout: 25000
+        pingInterval: 5000,
+        pingTimeout: 4000
     });
     engine.initIo(io);
 }
