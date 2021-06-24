@@ -1,8 +1,10 @@
-import { engine, canvas, toggleShowFps, toggleShowDebug } from './scene.mjs'
-import { Vector, Transform, TERRAIN_NAME, CAMERA_NAME } from './shared.mjs'
+import { engine, toggleShowFps, toggleShowDebug } from './scene.mjs'
+import { Vector, Transform, TERRAIN_NAME, CAMERA_NAME, defaultHeight } from './shared.mjs'
 import { sendRemoveMesh, sendMoveMeshTo, localUploadMesh, sendLoadMeshFromUrl } from './connection.mjs'
 import { manifest, onPickMesh, onStartMoveMesh, onUnpickMesh } from './controller.mjs'
-import { defaultHeight } from './shared.mjs';
+
+const canvas = document.querySelector("#renderCanvas");
+const fileInputs = document.getElementsByClassName("fileUpload");
 
 const pickHeight = 0.5;
 
@@ -13,16 +15,21 @@ const rotateKeyBind = 'r';
 const scaleKeyBind = 's';
 const unscaleKeyBind = 'S';
 
-const rotationChange = Math.PI/2;
-const scaleChange = 0.05;
+export let rotationChange = Math.PI/2;
+export let scaleChange = 0.05;
 
 let dom_init = false;
 
+export let pickedMesh = null;
+let tmpPickedMesh = null;
+let moving = false;
+let moved = false;
+
 export function addSceneBindings(scene) {
-    let pickedMesh = null;
-    let tmpPickedMesh = null;
-    let moving = false;
-    let moved = false;
+    pickedMesh = null;
+    tmpPickedMesh = null;
+    moving = false;
+    moved = false;
 
     scene.onPointerDown = function (evt, pickResult) {
         if (pickResult.hit) {
@@ -67,7 +74,7 @@ export function addSceneBindings(scene) {
             pickedMesh = tmpPickedMesh;
             tmpPickedMesh = null;
             onPickMesh(pickedMesh);
-            if (pickResult.pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
+            if (pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
                 moving = true;
                 moved = false;
                 const camera = scene.getCameraByName(CAMERA_NAME);
@@ -105,6 +112,7 @@ export function addSceneBindings(scene) {
                     if(pickedMesh) {
                         onUnpickMesh(pickedMesh);
                         sendRemoveMesh(pickedMesh.name);
+                        tmpPickedMesh = null;
                         pickedMesh = null;
                         moving = false;
                         moved = false;
@@ -120,34 +128,18 @@ export function addSceneBindings(scene) {
                     break;
                     
                 case rotateKeyBind:
-                    if(pickedMesh) {
-                        let new_y = pickedMesh.rotation._y+rotationChange;
-                        const new_transform = new Transform(    new Vector(pickedMesh.position._x, pickedMesh.position._y, pickedMesh.position._z),   
-                                                                new Vector(pickedMesh.rotation._x, new_y, pickedMesh.rotation._z), 
-                                                                new Vector(pickedMesh.scaling._x, pickedMesh.scaling._y, pickedMesh.scaling._z));
-                        manifest.update_single_move(manifest.getMeshNameFromLod(pickedMesh.name), new_transform);
-                        sendMoveMeshTo(pickedMesh.name, new_transform);
-                    }
+                    if(pickedMesh)
+                        rotateMesh(pickedMesh);
                     break;
                 
                 case scaleKeyBind:
-                    if(pickedMesh) {
-                        const new_transform = new Transform(    new Vector(pickedMesh.position._x, pickedMesh.position._y, pickedMesh.position._z),   
-                                                                new Vector(pickedMesh.rotation._x, pickedMesh.rotation._y, pickedMesh.rotation._z), 
-                                                                new Vector(pickedMesh.scaling._x+scaleChange, pickedMesh.scaling._y+scaleChange, pickedMesh.scaling._z+scaleChange));
-                        manifest.update_single_move(manifest.getMeshNameFromLod(pickedMesh.name), new_transform);
-                        sendMoveMeshTo(pickedMesh.name, new_transform);
-                    }
+                    if(pickedMesh)
+                        scaleUpMesh(pickedMesh);
                     break;
 
                 case unscaleKeyBind:
-                    if(pickedMesh) {
-                        const new_transform = new Transform(    new Vector(pickedMesh.position._x, pickedMesh.position._y, pickedMesh.position._z),   
-                                                                new Vector(pickedMesh.rotation._x, pickedMesh.rotation._y, pickedMesh.rotation._z), 
-                                                                new Vector(pickedMesh.scaling._x-scaleChange, pickedMesh.scaling._y-scaleChange, pickedMesh.scaling._z-scaleChange));
-                        manifest.update_single_move(manifest.getMeshNameFromLod(pickedMesh.name), new_transform);
-                        sendMoveMeshTo(pickedMesh.name, new_transform);
-                    }
+                    if(pickedMesh)
+                        scaleDownMesh(pickedMesh);
                     break;
 
                 default:
@@ -155,10 +147,36 @@ export function addSceneBindings(scene) {
             }
         });
         
+        if(fileInputs) for (const i of fileInputs) {
+            const fileInput = fileInputs[i];
+            fileInput.addEventListener('dragover', (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                event.dataTransfer.dropEffect = 'copy';
+            });
+            
+            fileInput.addEventListener('drop', (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                if(event.dataTransfer.files.length > 0) {
+                    for(let file of event.dataTransfer.files) {
+                        localUploadMesh(file);
+                    }
+                }
+            });
+
+            fileInput.addEventListener('change', () => {
+                if(fileInput.files.length > 0) {
+                    for(let file of fileInput.files) {
+                        localUploadMesh(file);
+                    }
+                }
+            });
+        }
+
         canvas.addEventListener('dragover', (event) => {
             event.stopPropagation();
             event.preventDefault();
-            // Style the drag-and-drop as a "copy file" operation.
             event.dataTransfer.dropEffect = 'copy';
         });
         
@@ -169,10 +187,6 @@ export function addSceneBindings(scene) {
             if(text) {
                 // validate
                 sendLoadMeshFromUrl(text);
-            } else if(event.dataTransfer.files.length > 0) {
-                for(let file of event.dataTransfer.files) {
-                    localUploadMesh(file);
-                }
             }
         });
 
@@ -180,4 +194,37 @@ export function addSceneBindings(scene) {
             engine.resize();
         });
     }
+}
+
+export function rotateMesh(mesh) {
+    let new_y = mesh.rotation._y+rotationChange;
+    const new_transform = new Transform(    new Vector(mesh.position._x, mesh.position._y, mesh.position._z),   
+                                            new Vector(mesh.rotation._x, new_y, mesh.rotation._z), 
+                                            new Vector(mesh.scaling._x, mesh.scaling._y, mesh.scaling._z));
+    manifest.update_single_move(manifest.getMeshNameFromLod(mesh.name), new_transform);
+    sendMoveMeshTo(mesh.name, new_transform);
+}
+
+export function scaleUpMesh(mesh) {
+    const new_transform = new Transform(    new Vector(mesh.position._x, mesh.position._y, mesh.position._z),   
+                                            new Vector(mesh.rotation._x, mesh.rotation._y, mesh.rotation._z), 
+                                            new Vector(mesh.scaling._x+scaleChange, mesh.scaling._y+scaleChange, mesh.scaling._z+scaleChange));
+    manifest.update_single_move(manifest.getMeshNameFromLod(mesh.name), new_transform);
+    sendMoveMeshTo(mesh.name, new_transform);
+}
+
+export function scaleDownMesh(mesh) {
+    const new_transform = new Transform(    new Vector(mesh.position._x, mesh.position._y, mesh.position._z),   
+                                            new Vector(mesh.rotation._x, mesh.rotation._y, mesh.rotation._z), 
+                                            new Vector(mesh.scaling._x-scaleChange, mesh.scaling._y-scaleChange, mesh.scaling._z-scaleChange));
+    manifest.update_single_move(manifest.getMeshNameFromLod(mesh.name), new_transform);
+    sendMoveMeshTo(mesh.name, new_transform);
+}
+
+export function rotateToMesh() {
+
+}
+
+export function scaleToMesh() {
+
 }

@@ -9,15 +9,16 @@ const assetList = document.getElementById("assetList");
 assetPickerShower.addEventListener("click", showAssetPicker, false);
 updateButton.addEventListener("click", updateAssets, false);
 
-var queryString = location.search.substring(1);
-var a = queryString.split("|");
+const params = (new URL(location)).searchParams;
+const room = params.get('room');
+const name = params.get('name');
 
-if(a[0]) {
-    console.log('connecting to room: ' + a[0]);
-    connectionJs.connectToRoom(a[0]);
+if(room && name) {
+    console.log('connecting to room ' + room + ' as ' + name);
+    connectionJs.connectToRoom(room, name);
     updateAssets();
 } else {
-    throw new Error('room not specified');
+    throw new Error('room or name not specified');
 }
 
 function showAssetPicker() {

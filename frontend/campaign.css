@@ -63,3 +63,98 @@ body {
     animation: 0.5s;
     transform: translateX(-100%);
 }
+
+#optionsPanel {
+    top: 5%;
+    left: 50%;
+    width: 50%;
+    position: absolute;
+    visibility: hidden;
+    opacity: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 1;
+}
+
+#optionsPanel > * {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+#visibility-drop-down {
+    margin-top: 2px;
+    background-color: whitesmoke;
+    visibility: hidden;
+    opacity: 0;
+}
+
+#visibility-drop-down > label {
+    display: flex;
+    padding-right: 8px;
+    white-space: nowrap;
+    align-items: center;
+    justify-content: center;
+}
+
+#visibility-drop-down > label span {
+    margin-left: 3px;
+    font-size: 14px;
+}
+
+#check-all {
+    border-bottom: 1px solid black;
+}
+
+/* animations */
+
+#visibility-drop-down.visible {
+    animation: show 0.5s ease-in-out;
+    animation-fill-mode: forwards;
+}
+
+#visibility-drop-down.hidden {
+    animation: hide 0.5s ease-in-out;
+    animation-fill-mode: forwards;
+}
+
+#optionsPanel.visible {
+    animation: show 0.5s ease-in-out;
+    animation-fill-mode: forwards;
+}
+
+#optionsPanel.hidden {
+    animation: hide 0.5s ease-in-out;
+    animation-fill-mode: forwards;
+}
+
+@keyframes show {
+    0% {
+        opacity: 0;
+        visibility: hidden;
+    }
+    1% {
+        opacity: 0;
+        visibility: visible;
+    }
+    100% {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+@keyframes hide {
+    0% {
+        opacity: 1;
+        visibility: visible;
+    }
+    99% {
+        opacity: 0;
+        visibility: visible;
+    }
+    100% {
+        opacity: 0;
+        visibility: hidden;
+    }
+}

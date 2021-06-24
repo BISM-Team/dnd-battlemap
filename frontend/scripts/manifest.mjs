@@ -1,6 +1,7 @@
 import { Vector, Transform, moveMeshTo, rotateMeshTo, scaleMeshTo, removeMesh, addMeshFromUrl } from './shared.mjs'
 
 export class Player {
+    name = '';
     constructor (name) { this.name = name; }
 }
 
@@ -23,7 +24,7 @@ export class Object {
         if(new_object === undefined && manifest.find(this.name) !== undefined) { this.remove(scene, manifest, 1); return; }
         if(new_object !== undefined && manifest.find(this.name) === undefined) { await this.load(scene, manifest); }
         if(!new_object.transform.isEqual(this.transform)) this.move(scene, new_object.transform);
-        this.show_hide(scene, new_object.viewers, player);
+        this.show_hide(scene, new_object.visibleToAll, new_object.viewers, player);
     }
 
     move(scene, transform) { 
@@ -53,10 +54,11 @@ export class Object {
         manifest.remove(this.name);
     }
 
-    show_hide(scene, viewers, player) { 
+    show_hide(scene, visibleToAll, viewers, player) { 
         const meshes = this.getLodMeshes(scene);
+        this.visibleToAll = visibleToAll;
         this.viewers = viewers; 
-        if(this.visibleToAll || this.viewers.find(viewer => { return viewer == player.name; })) {
+        if(this.visibleToAll || this.viewers.find(viewer => { return viewer.name == player.name; })) {
             meshes.forEach(mesh => { mesh.setEnabled(true); })
         } else {
             meshes.forEach(mesh => { mesh.setEnabled(false); })

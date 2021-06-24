@@ -12,26 +12,29 @@ export default function(app) {
         next();
     })
     app.use(responseTime((method, url, time) => {
-        console.log(`in ${time}ms`)
+        console.log(`${method} ${url} in ${time}ms`)
     }));
 
-//    app.use(allow_CORS);
-    app.use(function(req, res, next){ // for text/plain, text/...
-        if (req.is('text/*')) {
-        req.text = '';
-        req.setEncoding('utf8');
-        req.on('data', function(chunk){ req.text += chunk });
-        req.on('end', next);
-        } else {
-        next();
-        }
-    });
+//  app.use(allow_CORS);
+    app.use(text);
     app.use(express.json({ limit: '1mb' }));
 
     app.use('/assets', assets);
     app.use('/rooms', engineJs.router);
     app.use('/', client);
     app.use(error);
+}
+
+/**  for text/plain, text/... **/
+function text(req, res, next){ 
+    if (req.is('text/*')) {
+    req.text = '';
+    req.setEncoding('utf8');
+    req.on('data', function(chunk){ req.text += chunk });
+    req.on('end', next);
+    } else {
+    next();
+    }
 }
 
 function allow_CORS(req, res, next) {

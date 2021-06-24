@@ -19,7 +19,6 @@ let io = null;
 
 export function startIoServer(server) {
     io = new Server(server, {
-        maxHttpBufferSize: 1e8,
         transports: ['polling', 'websocket'],
         pingInterval: 5000,
         pingTimeout: 4000
@@ -27,15 +26,14 @@ export function startIoServer(server) {
     engine.initIo(io);
 }
 
-export async function startInstance(name) {
+async function startInstance(name) {
     if(!io) throw new Error('io server not started');
-    const instance = new Instance(name);
-    return await engine.registerInstance(instance);
+    return await engine.registerInstance(new Instance(name));
 }
 
-export function stopInstance(name) {
+/* function stopInstance(name) {
 
-}
+} */
 
 router.post('/:room', async (req, res) => {
     const result = await startInstance(req.params.room);

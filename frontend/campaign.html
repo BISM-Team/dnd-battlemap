@@ -7,6 +7,7 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://preview.babylonjs.com/babylon.js"></script>
+    <script src="https://preview.babylonjs.com/gui/babylon.gui.js"></script>
     <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
     <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
 
@@ -21,9 +22,21 @@
             <canvas id="renderCanvas" touch-action="none"></canvas>
         </div>
         <div id="assetPicker">
-            <button id="assetPickerShower"><i class="material-icons">arrow_left</i></button>
+            <button id="assetPickerShower"><i class="material-icons">chevron_left</i></button>
             <button id="updateAssets"><i class="material-icons">refresh</i></button>
+            <input id="addAssets" type="file" class="fileInput" ><i class="material-icons">add</i></input>
             <ul id="assetList"></ul>
+        </div>
+        <div id="optionsPanel">
+            <button id="rotate"><i class="material-icons">rotate_right</i></button>
+            <button id="scale"><i class="material-icons">transform</i></button>
+            <div>
+                <button id="visibility"><i class="material-icons">visibility</i></button>
+                <div id="visibility-drop-down" class="hidden">
+                    <label id="check-all"><input type="checkbox" name="all"  id="check-all-box" value="all"> <span>All</span></label>
+                    <ul id="player-checkboxes"></ul>
+                </div>
+            </div>
         </div>
     </div>
 

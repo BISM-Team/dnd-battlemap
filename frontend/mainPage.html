@@ -9,13 +9,15 @@
             flex-direction: column;
             align-items: center;
         }
-        .container > .button-container {
-            margin-top: 5px;
+        .container > * {
+            margin-top: 5px
+        }
+        .button-container {
             padding: 4px;
             display: flex;
             flex-direction: row;
         }
-        .container > .button-container > button {
+        .button-container > button {
             margin-left: 5px;
             margin-right: 5px;
         }
@@ -26,7 +28,8 @@
     <script type="module" src="./mainPage.mjs"></script>
 
     <div class="container">
-        <input id="room" type="text"/>
+        <input id="room" type="text" placeholder="room" title="Room you want to enter/start"/>
+        <input id="name" type="text" placeholder="username" title="Your public name"/>
         <div class="button-container">
             <button id="startRoom"> Start Room </button>
             <button id="joinRoom"> Join Room </button>

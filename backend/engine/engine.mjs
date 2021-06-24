@@ -1,8 +1,6 @@
 import BABYLON from 'babylonjs'
 import LOADERS from 'babylonjs-loaders'
 import xhr2 from 'xhr2'
-import fs from 'fs'
-import util from 'util'
 global.XMLHttpRequest = xhr2.XMLHttpRequest;
 
 import { Transform, Vector, defaultHeight, buildLods, sortMeshes, TERRAIN_NAME } from '../../frontend/scripts/shared.mjs'
@@ -22,8 +20,16 @@ export function initIo(_io) {
     io=_io;
 
     io.on('connect', (socket) => {
-        const query = socket.request._query;
-        socket.join(query['room']);
+        const room = socket.handshake.query['room'];
+
+        console.log('client connecting to room: ' +  room);
+        let instance;
+        if(room && (instance = instances.find(instance => { return instance.room == room; }))) {
+            socket.join(room);
+        } else {
+            socket.disconnect(true);
+            console.error('connection rejected: room not found ' + room);
+        }
     });
 
     io.of("/").adapter.on('join-room', (room, id) => {
@@ -31,12 +37,37 @@ export function initIo(_io) {
         if(!socket || room==id) return;
 
         let instance;
-        if(instance = instances.find(instance => { return instance.room == room; })) {
-            onJoinRoom(instance, socket);
-        } else {
+        if(instance = instances.find(instance => { return instance.room == room; })) // if the room exists
+        {
+            if(instance.players.findIndex(item => { return item.player.name == socket.handshake.auth['token']; }) == -1) { // if the player isn't in the room already
+                // add player to instance
+                instance.players.push({ player: new Player(socket.handshake.auth['token']), sid: id });
+                console.log(instance.players);
+                onJoinRoom(instance, socket);
+                // send new player list
+                io.to(room).emit('player-list', instance.players);
+            } else { // player already in the room
+                socket.leave(room);
+                socket.disconnect(true);
+                console.error('join rejected: player existant ' + room);
+            }
+        } else { // room not existant
             socket.leave(room);
             socket.disconnect(true);
-            console.error('Room not found ' + room);
+            console.error('join rejected: room not found ' + room);
+        }
+    });
+
+    io.of("/").adapter.on('leave-room', (room, id) => {
+        const socket = io.of("/").sockets.get(id);
+        let instance;
+        if(instance = instances.find(instance => { return instance.room == room; })) {
+            const name = socket.handshake.auth['token'];
+            // remove player from instance
+            instance.players.splice(instance.players.findIndex(item => { return item.player.name == name; }), 1);
+            console.log(instance.players);
+            // send new player list
+            io.to(room).emit('player-list', instance.players);
         }
     });
 }
@@ -77,33 +108,6 @@ function onJoinRoom(instance, socket) {
 
     console.log(instance.room +': client connected');
     socket.emit('load-scene', SCENE_LOC, filterSceneOut(manifest));
-    
-    // stream from client
-    socket.on('client-stream-mesh-chunk', async (filename, i, chunk) => {
-/*         console.log('add chunk ' + i + ' of ' + filename);
-        if(!fileBuffer[filename]) {
-            fileBuffer[filename] = {
-                chunks: [{ i: i, chunk: chunk }],
-                last_chunk: -1
-            }
-        } else {
-            fileBuffer[filename].chunks.push({ i: i, chunk: chunk });
-        }
-        await tryToFinishWrite(filename); */
-    });
-
-    socket.on('client-stream-mesh-last-chunk-index', async (filename, i) => {
-/*         console.log('set last chunk of ' + filename + 'to ' + i);
-        if(!fileBuffer[filename]) {
-            fileBuffer[filename] = {
-                chunks: [],
-                last_chunk: i
-            }
-        } else {
-            fileBuffer[filename].last_chunk = i;
-        }
-        await tryToFinishWrite(filename); */
-    });
 
     socket.on('client-load-mesh', async (filename) => {
         const new_object = new _Object(player);
@@ -132,18 +136,22 @@ function onJoinRoom(instance, socket) {
     });
 
     socket.on('client-move-mesh', (name, transform) => {
+        if(transform) { transform.__proto__ = Transform.prototype; transform.fix_protos(); }
         socket.to(room).emit('move-mesh', name, transform);
         manifest.update_single_move(name, transform, scene);
         console.log(instance.room +': mesh moved ' + name);
     });
 
-    socket.on('client-update-object', (name, new_object) => {
+    socket.on('client-update-mesh', (name, new_object) => {
         if(!new_object || !manifest.find(name)) throw new Error('update undefined object, use other functions');
+        new_object.__proto__ = _Object.prototype; 
+        new_object.fix_protos();
+        socket.to(room).emit('update-mesh', name, new_object);
         manifest.update_single(name, new_object, scene, player);
+        console.log(instance.room + ': mesh updated ' + name);
     });
 
     socket.on('disconnect', (reason) => {
-        socket.leave(room);
         console.error(instance.room +': client disconnected: ', reason);
     });
 }

@@ -1,28 +1,41 @@
-import { manifest, player, resetScene } from './controller.mjs'
-import { SceneManifest, Object } from './manifest.mjs'
+import { manifest, player, players, setPlayer, setPlayerList, resetScene } from './controller.mjs'
+import { SceneManifest, Object, Player } from './manifest.mjs'
 import { Transform } from './shared.mjs'
 
 let socket;
 
 /* Download */
 
-export function connectToRoom(room) {
+export function connectToRoom(room, name) {
     if(socket) socket.disconnect(true);
+
+    setPlayer(name);
 
     socket = io({
         transports: ['websocket'],
         autoConnect: false,
         query: {
             'room': room
+        },
+        auth: {
+            'token': player.name
         }
     });
     socket.connect();
+
+    socket.on('player-list', (_players) => {
+        _players.forEach(_player => {
+            if(_player) { _player.player.__proto__ = Player.prototype; }
+        });
+        setPlayerList(_players);
+        console.log('player list updated ', players);
+    })
 
     socket.on('load-scene', async (url, new_manifest) => {
         if(new_manifest) { new_manifest.__proto__ = SceneManifest.prototype; new_manifest.fix_protos(); }
         resetScene();
         await BABYLON.SceneLoader.AppendAsync('', url, manifest._scene);
-        manifest.update_all(new_manifest);
+        manifest.update_all(new_manifest, player);
         console.log('scene load client ' + url);
     });
     
@@ -41,6 +54,12 @@ export function connectToRoom(room) {
         if(transform) { transform.__proto__ = Transform.prototype; transform.fix_protos(); }
         manifest.update_single_move(name, transform);
         console.log('client mesh moved ' + name);
+    });
+
+    socket.on('update-mesh', (name, new_obj) => {
+        if(new_obj) { new_obj.__proto__ = Object.prototype; new_obj.fix_protos(); }
+        manifest.update_single(name, new_obj, player);
+        console.log('client mesh updated ' + name);
     });
     
     socket.on('connect', () => {
@@ -105,4 +124,9 @@ export function sendRemoveMesh(lodName) {
     const name = manifest.getMeshNameFromLod(lodName);
     socket.emit('client-remove-mesh', name);
     console.log('send remove mesh ' + name);
+}
+
+export function sendUpdateMesh(name, new_object) {
+    socket.emit('client-update-mesh', name, new_object);
+    console.log('send update mesh' + name);
 }
