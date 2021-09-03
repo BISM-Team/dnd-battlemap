@@ -32,6 +32,8 @@ export function addSceneBindings(scene) {
     moved = false;
 
     scene.onPointerDown = function (evt, pickResult) {
+        if(evt.button == 2) return;
+
         if (pickResult.hit) {
             if(pickedMesh && pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
                 tmpPickedMesh = pickResult.pickedMesh;
