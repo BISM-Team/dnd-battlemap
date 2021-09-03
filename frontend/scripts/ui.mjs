@@ -11,6 +11,14 @@ const player_checkboxes = document.getElementById("player-checkboxes");
 let mesh=null;
 let obj=null;
 
+
+rotate_btn.addEventListener('contextmenu', e => e.preventDefault());
+
+scale_btn.addEventListener('contextmenu', e => e.preventDefault());
+
+visibility_btn.addEventListener('contextmenu', e => e.preventDefault());
+
+
 rotate_btn.addEventListener("mousedown", ev => {
     ev.preventDefault();
     if(mesh) rotateMesh(mesh);
