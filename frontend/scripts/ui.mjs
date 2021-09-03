@@ -1,5 +1,4 @@
-import { Vector, Transform } from "./shared.mjs";
-import { scaleChange, rotationChange, scaleUpMesh, scaleDownMesh, rotateMesh } from "./input.mjs";
+import { scaleUpMesh, scaleDownMesh, rotateMesh } from "./input.mjs";
 import { manifest, player, players } from "./controller.mjs";
 import { sendUpdateMesh } from "./connection.mjs"
 
@@ -12,11 +11,13 @@ const player_checkboxes = document.getElementById("player-checkboxes");
 let mesh=null;
 let obj=null;
 
-rotate_btn.addEventListener("mousedown", () => {
+rotate_btn.addEventListener("mousedown", ev => {
+    ev.preventDefault();
     if(mesh) rotateMesh(mesh);
 });
 
 scale_btn.addEventListener("mousedown", ev => {
+    ev.preventDefault();
     if(mesh)
         if(ev.button==0)
             scaleUpMesh(mesh);

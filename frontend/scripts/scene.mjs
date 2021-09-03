@@ -14,6 +14,7 @@ export function initScene(scene) {
 
     let camera = new BABYLON.ArcRotateCamera(CAMERA_NAME, Math.PI / 2, Math.PI / 3 , 20, new BABYLON.Vector3(0,defaultHeight,0), scene);
     scene.setActiveCameraByName(CAMERA_NAME);
+    camera.panningSensibility = 150;
     camera.attachControl(canvas, true);
 
     camera.lowerRadiusLimit = 5;
