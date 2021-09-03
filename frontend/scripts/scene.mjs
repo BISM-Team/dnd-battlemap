@@ -24,9 +24,9 @@ export function initScene(scene) {
     camera.maxZ = 300;
 
     let ambientLight_Up_Down = new BABYLON.HemisphericLight('ambientLight_up', new BABYLON.Vector3(0, 1, 0), scene);
-    let ambientLight_Down_Up = new BABYLON.HemisphericLight('ambientLight_down', new BABYLON.Vector3(0, -1, 0), scene);
-    ambientLight_Up_Down.intensity = 0.3;
-    ambientLight_Down_Up.intensity = 0.3;
+    //let ambientLight_Down_Up = new BABYLON.HemisphericLight('ambientLight_down', new BABYLON.Vector3(0, -1, 0), scene);
+    ambientLight_Up_Down.intensity = 1.0;
+    //ambientLight_Down_Up.intensity = 0.3;
 
     //let postProcess = new BABYLON.FxaaPostProcess("fxaa", 1.0, camera);
     //let tonemap = new BABYLON.TonemapPostProcess("tonemap", BABYLON.TonemappingOperator.Photographic, 2.0, camera);
