@@ -104,8 +104,28 @@ body {
     font-size: 14px;
 }
 
+#player-checkboxes > label {
+    display: flex;
+    padding-right: 8px;
+    white-space: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+#player-checkboxes > label span {
+    margin-left: 3px;
+    font-size: 14px;
+}
+
 #check-all {
     border-bottom: 1px solid black;
+}
+
+#visibility-drop-down > ul {
+    display: flex;
+    flex-direction: column;
+    padding: 0px;
+    margin-top: 4px;
 }
 
 /* animations */
