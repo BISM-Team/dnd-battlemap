@@ -12,7 +12,7 @@ import { defaultHeight, CAMERA_NAME } from './shared.mjs'
 export function initScene(scene) {
     scene.collisionsEnabled = true;
 
-    let camera = new BABYLON.ArcRotateCamera(CAMERA_NAME, Math.PI / 2, Math.PI / 3 , 20, new BABYLON.Vector3(0,defaultHeight,0), scene);
+    let camera = new BABYLON.ArcRotateCamera(CAMERA_NAME, Math.PI / 2, Math.PI / 3 , 20, new BABYLON.Vector3(0,defaultHeight*2,0), scene);
     scene.setActiveCameraByName(CAMERA_NAME);
     camera.panningSensibility = 150;
     camera.attachControl(canvas, true);
@@ -42,6 +42,7 @@ export function initScene(scene) {
 
     engine.runRenderLoop(function() {
         if(divFps) divFps.innerHTML = engine.getFps().toFixed() + " fps";
+        camera.panningAxis = new BABYLON.Vector3(1, Math.cos(camera.beta), Math.sin(camera.beta));
         scene.render();
     });
 }

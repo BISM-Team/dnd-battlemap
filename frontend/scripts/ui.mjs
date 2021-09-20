@@ -86,4 +86,8 @@ export function addOptionsPanel(_mesh) {
 export function removeOptionsPanel() {
     document.getElementById("optionsPanel").classList.remove("visible");
     document.getElementById("optionsPanel").classList.add("hidden");
+
+    document.getElementById("visibility-drop-down").classList.remove("visible");
+    if(!document.getElementById("visibility-drop-down").classList.contains("hidden"))
+        document.getElementById("visibility-drop-down").classList.add("hidden");
 }
