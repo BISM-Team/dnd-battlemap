@@ -57,6 +57,21 @@ export async function addMeshFromUrl(scene, url, lodNames) {
     let result = (await BABYLON.SceneLoader.ImportMeshAsync('', '', url, scene, null, '.babylon'));
     buildLods(sortMeshes(result.meshes), scene);
     for(let i in result.meshes) {
+        if(!result.meshes[i].material) {
+            result.meshes[i].material = new BABYLON.PBRMaterial("PBRMat", scene);
+            result.meshes[i].material.albedoColor = new BABYLON.Color3(0.65, 0.65, 0.65);
+            result.meshes[i].material.ambientColor = new BABYLON.Color3(1, 1, 1);
+            result.meshes[i].material.metallic = 0.0;
+            result.meshes[i].material.roughness = 1.0;
+            //result.meshes[i].material.forceIrradianceInFragment = true;
+            result.meshes[i].material.clearCoat.isEnabled = true;
+        } else if(result.meshes[i].material.subMaterials) {
+            for(let m in result.meshes[i].material.subMaterials) {
+                result.meshes[i].material.subMaterials[m].ambientColor = new BABYLON.Color3(0.0, 0.0, 0.0);
+            }
+        } else {
+            result.meshes[i].material.ambientColor = new BABYLON.Color3(1, 1, 1);
+        }
         lodNames.push(result.meshes[i].name);
     }
 }

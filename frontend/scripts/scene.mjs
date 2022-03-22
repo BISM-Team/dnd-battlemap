@@ -23,9 +23,12 @@ export function initScene(scene) {
     camera.minZ = 1;
     camera.maxZ = 300;
 
-    let ambientLight_Up_Down = new BABYLON.HemisphericLight('ambientLight_up', new BABYLON.Vector3(0, 1, 0), scene);
+    scene.clearColor = new BABYLON.Color3(0.0, 0.0, 0.0);
+    scene.ambientColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+
+    //let ambientLight_Up_Down = new BABYLON.HemisphericLight('ambientLight_up', new BABYLON.Vector3(0, 1, 0), scene);
     //let ambientLight_Down_Up = new BABYLON.HemisphericLight('ambientLight_down', new BABYLON.Vector3(0, -1, 0), scene);
-    ambientLight_Up_Down.intensity = 1.0;
+    //ambientLight_Up_Down.intensity = 1.0;
     //ambientLight_Down_Up.intensity = 0.3;
 
     //let postProcess = new BABYLON.FxaaPostProcess("fxaa", 1.0, camera);
@@ -33,7 +36,7 @@ export function initScene(scene) {
     //let imgProcessing = new BABYLON.ImageProcessingPostProcess("processing", 1.0, camera);
 
     scene.imageProcessingConfiguration.toneMappingEnabled = true;
-    scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
+    //scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
 
     //imgProcessing.exposure = 0.5;
     //imgProcessing.contrast = 5.0;
