@@ -1,11 +1,4 @@
-{"producer":{"name":"Blender","version":"2.83.0","exporter_version":"6.4.3","file":"scene.babylon"},
-"autoClear":true,"clearColor":[0.0509,0.0509,0.0509],"gravity":[0,-9.81,0],
-"materials":[],
-"multiMaterials":[],
-"skeletons":[],
-"meshes":[],
-"morphTargetManagers":[],
-"cameras":[],
-"lights":[{"name":"Sun.002","id":"Sun.002","type":1,"position":[-9.334,10.0402,-12.2337],"direction":[0.2472,-0.4298,0.8684],"intensityMode":3,"intensity":0.2,"diffuse":[1,1,1],"specular":[1,1,1],"radius":0.125},{"name":"Sun","id":"Sun","type":1,"position":[3.2708,10.0402,14.0157],"direction":[-0.5579,-0.5734,-0.5999],"intensityMode":3,"intensity":2,"diffuse":[1,1,1],"specular":[1,1,1],"radius":0.125},{"name":"Sun.001","id":"Sun.001","type":1,"position":[-23.4598,10.0402,-5.7357],"direction":[0.8254,-0.3954,0.4029],"intensityMode":3,"intensity":0.2,"diffuse":[1,1,1],"specular":[1,1,1],"radius":0.125}],
-"shadowGenerators":[]
+{"producer":{"name":"Blender","version":"3.1.0","exporter_version":"2.93.5","file":"scene.babylon"},
+"autoClear":true,"clearColor":[0.0509,0.0509,0.0509],"gravity":[0,-9.81,0],"environmentTexture":"assets/lysGenerated_sunset.env","isPBR":true,"environmentTextureRotationY":0,"createDefaultSkybox":true,"skyboxBlurLevel ":0,
+"lights":[{"name":"Sun.002","id":"Sun.002","type":1,"position":[-9.334,10.0402,-12.2337],"direction":[0.2472,-0.4298,0.8684],"intensityMode":3,"intensity":0.2,"diffuse":[1,1,1],"specular":[1,1,1],"radius":0.125},{"name":"Sun","id":"Sun","type":1,"position":[3.2708,10.0402,14.0157],"direction":[-0.5579,-0.5734,-0.5999],"intensityMode":3,"intensity":2,"diffuse":[1,1,1],"specular":[1,1,1],"radius":0.125},{"name":"Sun.001","id":"Sun.001","type":1,"position":[-23.4598,10.0402,-5.7357],"direction":[0.8254,-0.3954,0.4029],"intensityMode":3,"intensity":0.2,"diffuse":[1,1,1],"specular":[1,1,1],"radius":0.125}]
 }

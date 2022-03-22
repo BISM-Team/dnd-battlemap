@@ -23,25 +23,10 @@ export function initScene(scene) {
     camera.minZ = 1;
     camera.maxZ = 300;
 
-    scene.clearColor = new BABYLON.Color3(0.0, 0.0, 0.0);
-    scene.ambientColor = new BABYLON.Color3(0.1, 0.1, 0.1);
-
-    //let ambientLight_Up_Down = new BABYLON.HemisphericLight('ambientLight_up', new BABYLON.Vector3(0, 1, 0), scene);
-    //let ambientLight_Down_Up = new BABYLON.HemisphericLight('ambientLight_down', new BABYLON.Vector3(0, -1, 0), scene);
-    //ambientLight_Up_Down.intensity = 1.0;
-    //ambientLight_Down_Up.intensity = 0.3;
-
-    //let postProcess = new BABYLON.FxaaPostProcess("fxaa", 1.0, camera);
-    //let tonemap = new BABYLON.TonemapPostProcess("tonemap", BABYLON.TonemappingOperator.Photographic, 2.0, camera);
-    //let imgProcessing = new BABYLON.ImageProcessingPostProcess("processing", 1.0, camera);
-
     scene.imageProcessingConfiguration.toneMappingEnabled = true;
     //scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
 
-    //imgProcessing.exposure = 0.5;
-    //imgProcessing.contrast = 5.0;
-
-/*     optimizeScene(scene);  */
+    //optimizeScene(scene);
 
     engine.runRenderLoop(function() {
         if(divFps) divFps.innerHTML = engine.getFps().toFixed() + " fps";

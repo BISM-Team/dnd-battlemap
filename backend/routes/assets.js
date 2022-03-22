@@ -6,7 +6,7 @@ const router = express.Router();
 
 const readdir = util.promisify(fs.readdir);
 const writeFile = util.promisify(fs.writeFile);
-const _babylon = new RegExp(/[^.\n]*\.babylon$/);
+const _babylon = new RegExp(/[^.\n]*\.(babylon|babylon\.manifest|env)$/);
 
 router.get('/', async (req, res) => {
     const files = (await readdir('./backend/assets')).filter( file => { return file.match(_babylon); } );;
