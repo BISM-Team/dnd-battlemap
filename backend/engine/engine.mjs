@@ -83,11 +83,11 @@ export async function registerInstance(instance) {
     
     new BABYLON.ArcRotateCamera("Camera", 0, 0.8, 100, BABYLON.Vector3.Zero(), manifest._scene);
 
-    try {
+    /*try {
         await BABYLON.SceneLoader.AppendAsync(SCENE_ROOT, SCENE_LOC, manifest._scene);
     } catch(ex) {
         console.error(instance.room +`: Could not load scene at ${SCENE_ROOT}${SCENE_LOC}`, ex);
-    }
+    }*/
 
     engine.runRenderLoop(function() {
         manifest._scene.render();

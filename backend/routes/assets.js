@@ -6,7 +6,8 @@ const router = express.Router();
 
 const readdir = util.promisify(fs.readdir);
 const writeFile = util.promisify(fs.writeFile);
-const _babylon = new RegExp(/[^.\n]*\.(babylon|babylon\.manifest|env)$/);
+const _anyfilename = new RegExp(/[^.\n]*\.(babylon|babylon\.manifest|env|jpg|png|img)$/);
+const _babylon = new RegExp(/[^.\n]*\.babylon$/);
 
 router.get('/', async (req, res) => {
     const files = (await readdir('./backend/assets')).filter( file => { return file.match(_babylon); } );;
@@ -15,6 +16,8 @@ router.get('/', async (req, res) => {
 })
 
 router.get('/:filename', async (req, res) => {
+    if(!req.params.filename.match(_anyfilename)) throw new Error(404);
+
     try {
         return res.sendFile(`${path.resolve()}/backend/assets/${req.params.filename}`);
     }
@@ -29,6 +32,8 @@ router.post('/:filename', async (req, res) => {
     const filename = req.params.filename;
     const i = req.query['i'];
     const chunk = req.text;
+
+    if(!filename.match(_anyfilename)) throw new Error(400);
 
     if(req.query['data'] == 'true') {
         console.log('add chunk ' + i + ' of ' + filename);

@@ -6,7 +6,7 @@ const router = express.Router();
 
 const readFile = util.promisify(fs.readFile);
 
-const image = new RegExp(/[^.\n]*\.(?:png|img|jpg)$/);
+const assets = new RegExp(/[^.\n]*\.(babylon|babylon\.manifest|env|jpg|png|img)$/);
 
 router.get('/', async (req, res) => {
     const file = await readFile(`./frontend/mainPage.html`);
@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:filename', async (req, res) => {
-    if(req.params.filename.match(image)) return res.redirect(`/assets/${req.params.filename}`);
+    if(req.params.filename.match(assets)) return res.redirect(`/assets/${req.params.filename}`);
 
     const file = path.join(__dirname, '../../frontend/', req.params.filename);
     try {

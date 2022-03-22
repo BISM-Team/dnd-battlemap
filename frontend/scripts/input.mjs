@@ -84,13 +84,14 @@ export function addSceneBindings(scene) {
             }
         }
         if(pickedMesh && moved) {
-            const vec = pickedMesh.position;
-            const endPos = new Vector(vec._x, vec._y-pickHeight, vec._z);
-            endPos.y = endPos.y > defaultHeight ? endPos.y : defaultHeight;
-            pickedMesh.position = new BABYLON.Vector3(endPos.x, endPos.y, endPos.z);
-            sendMoveMeshTo(pickedMesh.name, new Transform(endPos,   new Vector(pickedMesh.rotation._x, pickedMesh.rotation._y, pickedMesh.rotation._z), 
-                                                                    new Vector(pickedMesh.scaling._x, pickedMesh.scaling._y, pickedMesh.scaling._z)));
-
+            if (pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
+                const vec = pickedMesh.position;
+                const endPos = new Vector(vec._x, vec._y-pickHeight, vec._z);
+                endPos.y = endPos.y > defaultHeight ? endPos.y : defaultHeight;
+                pickedMesh.position = new BABYLON.Vector3(endPos.x, endPos.y, endPos.z);
+                sendMoveMeshTo(pickedMesh.name, new Transform(endPos,   new Vector(pickedMesh.rotation._x, pickedMesh.rotation._y, pickedMesh.rotation._z), 
+                                                                        new Vector(pickedMesh.scaling._x, pickedMesh.scaling._y, pickedMesh.scaling._z)));
+            }
             const camera = scene.getCameraByName(CAMERA_NAME);
             camera.attachControl(canvas, true);
             onUnpickMesh(pickedMesh);
