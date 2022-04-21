@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "babylonjs": "^4.2.0",
-    "babylonjs-loaders": "^4.1.0",
+    "babylonjs-loaders": "^5.3.0",
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "express-response-time": "0.0.6",
