@@ -77,24 +77,9 @@ export async function registerInstance(instance) {
     if(instances.find(_instance => { return _instance.room == instance.room; })) {
         return { ok: false, message: 'room already exists' };
     }
-
-    const engine = new BABYLON.NullEngine();
-    const manifest = new SceneManifest(new BABYLON.Scene(engine));
-    
-    new BABYLON.ArcRotateCamera("Camera", 0, 0.8, 100, BABYLON.Vector3.Zero(), manifest._scene);
-
-    /*try {
-        await BABYLON.SceneLoader.AppendAsync(SCENE_ROOT, SCENE_LOC, manifest._scene);
-    } catch(ex) {
-        console.error(instance.room +`: Could not load scene at ${SCENE_ROOT}${SCENE_LOC}`, ex);
-    }*/
-
-    engine.runRenderLoop(function() {
-        manifest._scene.render();
-    });
+    const manifest = new SceneManifest(null);
 
     instance.manifest = manifest;
-    instance.engine = engine;
     instances.push(instance);
 
     console.log(instance.room + ': Room started');
@@ -103,7 +88,6 @@ export async function registerInstance(instance) {
 
 function onJoinRoom(instance, socket) {
     const manifest = instance.manifest;
-    const scene = manifest._scene;
     const room = instance.room;
 
     console.log(instance.room +': client connected');
@@ -113,16 +97,6 @@ function onJoinRoom(instance, socket) {
         const new_object = new _Object(player);
         new_object.name = filename;
         new_object.meshUrl = `assets/${filename}`;
-
-        const result = await BABYLON.SceneLoader.ImportMeshAsync('', SCENE_ROOT, `assets/${filename}`, scene, null, '.babylon');
-        buildLods(sortMeshes(result.meshes), scene);
-        for(let i in result.meshes) {
-            new_object.lodNames.push(result.meshes[i].name);
-        }
-        new_object.transform = new Transform(   new Vector(0.0, defaultHeight, 0.0), 
-                                                new Vector(result.meshes[0].rotation._x, result.meshes[0].rotation._y, result.meshes[0].rotation._z), 
-                                                new Vector(result.meshes[0].scaling._x, result.meshes[0].scaling._y, result.meshes[0].scaling._z));
-        if(result.meshes[0].name == TERRAIN_NAME) { new_object.transform.location.y = 0.0; result.meshes[0].position.y = 0.0; }
         manifest.add(new_object);
 
         io.to(room).emit('load-mesh', new_object.name, new_object);
@@ -131,14 +105,14 @@ function onJoinRoom(instance, socket) {
 
     socket.on('client-remove-mesh', (name) => {
         io.to(room).emit('remove-mesh', name);
-        manifest.update_single(name, undefined, scene, player);
+        manifest.update_single(name, undefined, player);
         console.log(instance.room +': removed mesh ' + name);
     });
 
     socket.on('client-move-mesh', (name, transform) => {
         if(transform) { transform.__proto__ = Transform.prototype; transform.fix_protos(); }
         socket.to(room).emit('move-mesh', name, transform);
-        manifest.update_single_move(name, transform, scene);
+        manifest.update_single_move(name, transform);
         console.log(instance.room +': mesh moved ' + name);
     });
 
@@ -147,7 +121,7 @@ function onJoinRoom(instance, socket) {
         new_object.__proto__ = _Object.prototype; 
         new_object.fix_protos();
         socket.to(room).emit('update-mesh', name, new_object);
-        manifest.update_single(name, new_object, scene, player);
+        manifest.update_single(name, new_object, player);
         console.log(instance.room + ': mesh updated ' + name);
     });
 

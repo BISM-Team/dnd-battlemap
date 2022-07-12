@@ -1,4 +1,4 @@
-import { Vector, Transform, moveMeshTo, rotateMeshTo, scaleMeshTo, removeMesh, addMeshFromUrl } from './shared.mjs'
+import { Vector, Transform, moveMeshTo, rotateMeshTo, scaleMeshTo, removeMesh, addMeshFromUrl, defaultHeight, TERRAIN_NAME } from './shared.mjs'
 
 export class Player {
     name = '';
@@ -29,17 +29,28 @@ export class Object {
 
     move(scene, transform) { 
         this.transform = transform;
-        const mesh = scene.getMeshByName(this.lodNames[0]);
-        if(!mesh) { console.error(this.lodNames[0] + " not found"); return; }
-        moveMeshTo(scene, mesh, transform.location);
-        rotateMeshTo(scene, mesh, transform.rotation);
-        scaleMeshTo(scene, mesh, transform.scaling);
+        if(scene) {
+            const mesh = scene.getMeshByName(this.lodNames[0]);
+            if(!mesh) { console.error(this.lodNames[0] + " not found"); return; }
+            moveMeshTo(scene, mesh, transform.location);
+            rotateMeshTo(scene, mesh, transform.rotation);
+            scaleMeshTo(scene, mesh, transform.scaling);
+        }
     }
 
     async load(scene, manifest) { 
         this.lodNames = [];
         manifest.add(this);
-        await addMeshFromUrl(scene, this.meshUrl, this.lodNames);
+        let result = null;
+        if(scene) {
+            result = await addMeshFromUrl(scene, this.meshUrl, this.lodNames);
+            if(this.transform.isEqual(new Transform( new Vector(0.0, 0.0, 0.0), new Vector(0.0, 0.0, 0.0), new Vector(0.0, 0.0, 0.0)))) {
+                this.transform = new Transform( new Vector(0.0, defaultHeight, 0.0), 
+                                                new Vector(result.meshes[0].rotation._x, result.meshes[0].rotation._y, result.meshes[0].rotation._z), 
+                                                new Vector(result.meshes[0].scaling._x, result.meshes[0].scaling._y, result.meshes[0].scaling._z));
+                if(result.meshes[0].name == TERRAIN_NAME) { this.transform.location.y = 0.0; }
+            }
+        }
         this.move(scene, this.transform);
     }
 
@@ -50,18 +61,21 @@ export class Object {
             setTimeout(this.remove, 300, scene, manifest, 0);
             return;
         }
-        this.lodNames.forEach((_name) => { removeMesh(scene, scene.getMeshByName(_name)); });
+        if(scene) this.lodNames.forEach((_name) => { removeMesh(scene, scene.getMeshByName(_name)); });
         manifest.remove(this.name);
     }
 
     show_hide(scene, visibleToAll, viewers, player) { 
-        const meshes = this.getLodMeshes(scene);
         this.visibleToAll = visibleToAll;
         this.viewers = viewers; 
-        if(this.visibleToAll || this.viewers.find(viewer => { return viewer.name == player.name; })) {
-            meshes.forEach(mesh => { mesh.setEnabled(true); })
-        } else {
-            meshes.forEach(mesh => { mesh.setEnabled(false); })
+
+        if(scene) {
+            const meshes = this.getLodMeshes(scene);
+            if(this.visibleToAll || this.viewers.find(viewer => { return viewer.name == player.name; })) {
+                meshes.forEach(mesh => { mesh.setEnabled(true); })
+            } else {
+                meshes.forEach(mesh => { mesh.setEnabled(false); })
+            }
         }
         /* TODO show and hide lods (with animation?) */
     };

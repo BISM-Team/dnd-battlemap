@@ -67,7 +67,6 @@ check_all_box.addEventListener("change", () => {
 });
 
 async function updateObj(obj) {
-    console.log(player);
     await manifest.update_single(obj.name, obj, player);
     sendUpdateMesh(obj.name, obj);
 }

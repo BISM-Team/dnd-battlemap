@@ -66,9 +66,9 @@ body {
 }
 
 #optionsPanel {
-    top: 5%;
-    left: 50%;
-    width: 50%;
+    top: 1em;
+    right: 6em;
+    width: 10em;
     position: absolute;
     visibility: hidden;
     opacity: 0;

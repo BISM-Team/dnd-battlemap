@@ -72,6 +72,7 @@ export async function addMeshFromUrl(scene, url, lodNames) {
         result.meshes[i].renderingGroupId = 1;
         lodNames.push(result.meshes[i].name);
     }
+    return result;
 }
 
 export function moveMeshTo(scene, mesh, target) {
