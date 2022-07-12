@@ -1,5 +1,5 @@
 import { scaleUpMesh, scaleDownMesh, rotateMesh } from "./input.mjs";
-import { manifest, player, players } from "./controller.mjs";
+import { manifest, player, players, setActiveLayer } from "./controller.mjs";
 import { sendUpdateMesh } from "./connection.mjs"
 
 const rotate_btn = document.getElementById("rotate");
@@ -7,6 +7,7 @@ const scale_btn = document.getElementById("scale");
 const visibility_btn = document.getElementById("visibility");
 const check_all_box = document.getElementById("check-all-box");
 const player_checkboxes = document.getElementById("player-checkboxes");
+const layerSelection = document.getElementById("layerSelection");
 
 let mesh=null;
 let obj=null;
@@ -59,6 +60,10 @@ visibility_btn.addEventListener("mousedown", () => {
         });
         player_checkboxes.appendChild(label);
     });
+});
+
+layerSelection.addEventListener("change", () => {
+    setActiveLayer(parseInt(layerSelection.value));
 });
 
 check_all_box.addEventListener("change", () => {

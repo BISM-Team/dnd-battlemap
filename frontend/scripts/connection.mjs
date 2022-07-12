@@ -109,8 +109,8 @@ export function localUploadMesh(file) {
     reader.readAsText(file);
 }
 
-export function sendLoadMeshFromUrl(filename) {
-    socket.emit('client-load-mesh', filename);
+export function sendLoadMeshFromUrl(filename, layer) {
+    socket.emit('client-load-mesh', filename, layer);
     console.log('send load mesh ' + filename);
 }
 

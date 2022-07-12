@@ -93,10 +93,11 @@ function onJoinRoom(instance, socket) {
     console.log(instance.room +': client connected');
     socket.emit('load-scene', SCENE_LOC, filterSceneOut(manifest));
 
-    socket.on('client-load-mesh', async (filename) => {
+    socket.on('client-load-mesh', async (filename, layer) => {
         const new_object = new _Object(player);
         new_object.name = filename;
         new_object.meshUrl = `assets/${filename}`;
+        new_object.layer = layer;
         manifest.add(new_object);
 
         io.to(room).emit('load-mesh', new_object.name, new_object);

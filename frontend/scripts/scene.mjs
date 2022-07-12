@@ -26,8 +26,6 @@ export function initScene(scene) {
     scene.imageProcessingConfiguration.toneMappingEnabled = true;
     //scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
 
-    //optimizeScene(scene);
-
     engine.runRenderLoop(function() {
         if(divFps) divFps.innerHTML = engine.getFps().toFixed() + " fps";
         camera.panningAxis = new BABYLON.Vector3(1, Math.cos(camera.beta), Math.sin(camera.beta));
@@ -35,24 +33,7 @@ export function initScene(scene) {
     });
 }
 
-/* let lastTimeout;
-function optimizeScene(scene) {
-    if(scene) {
-        BABYLON.SceneOptimizer.OptimizeAsync(scene, BABYLON.SceneOptimizerOptions.ModerateDegradationAllowed(),
-        function() {
-            console.log('Optimizer success');
-            lastTimeout = setTimeout(optimizeScene, 5000, scene);
-        // On success
-        }, function() {
-            console.log('Optimizer fail');
-            lastTimeout = setTimeout(optimizeScene, 5000, scene);
-        // FPS target not reached
-    });
-    }
-} */
-
 export function resetScene(scene) {
-/*     if(lastTimeout) { clearTimeout(lastTimeout); lastTimeout = undefined; } */
     if(scene) scene.dispose();
     if(h_layer) h_layer.dispose();
     if(guiTex) guiTex.dispose();

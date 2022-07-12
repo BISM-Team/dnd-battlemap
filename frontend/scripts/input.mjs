@@ -1,7 +1,7 @@
 import { engine, toggleShowFps, toggleShowDebug } from './scene.mjs'
 import { Vector, Transform, TERRAIN_NAME, CAMERA_NAME, defaultHeight } from './shared.mjs'
 import { sendRemoveMesh, sendMoveMeshTo, localUploadMesh, sendLoadMeshFromUrl } from './connection.mjs'
-import { manifest, onPickMesh, onStartMoveMesh, onUnpickMesh } from './controller.mjs'
+import { manifest, onPickMesh, onStartMoveMesh, onUnpickMesh, active_layer } from './controller.mjs'
 
 const canvas = document.querySelector("#renderCanvas");
 const fileInputs = document.getElementsByClassName("fileUpload");
@@ -25,6 +25,16 @@ let tmpPickedMesh = null;
 let moving = false;
 let moved = false;
 
+function canPick(mesh) {
+    let object;
+    return mesh.isPickable && (object=manifest.getObjectFromLod(mesh.name)) && object.layer == active_layer; // can only pick objects from active layer
+}
+
+function canHit(mesh) {
+    let object;
+    return mesh!=pickedMesh && mesh.isPickable && (object=manifest.getObjectFromLod(mesh.name)) && object.layer < active_layer; // picked objects can only interact with lower layers
+}
+
 export function addSceneBindings(scene) {
     pickedMesh = null;
     tmpPickedMesh = null;
@@ -34,12 +44,13 @@ export function addSceneBindings(scene) {
     scene.onPointerDown = function (evt, pickResult) {
         if(evt.button == 2) return;
 
-        if (pickResult.hit) {
+        const pick = scene.pickWithRay(pickResult.ray, canPick);
+        if (pick.hit) {
             if(pickedMesh && pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
-                tmpPickedMesh = pickResult.pickedMesh;
+                tmpPickedMesh = pick.pickedMesh;
             } else {
-                tmpPickedMesh = null;
-                pickedMesh = pickResult.pickedMesh;
+                tmpPickedMesh = null; 
+                pickedMesh = pick.pickedMesh;
                 onPickMesh(pickedMesh);
             }
             if (pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
@@ -60,7 +71,7 @@ export function addSceneBindings(scene) {
 
     scene.onPointerMove = function (evt, pickResult) {
         if(moving) {
-            const pick = scene.pickWithRay(pickResult.ray, (mesh) => { return mesh!=pickedMesh && mesh.isPickable; });
+            const pick = scene.pickWithRay(pickResult.ray, canHit);
             if(pick.pickedMesh) {
                 onStartMoveMesh(pickedMesh);
                 moved = true;
@@ -189,7 +200,7 @@ export function addSceneBindings(scene) {
             const text = event.dataTransfer.getData('text/plain');
             if(text) {
                 // validate
-                sendLoadMeshFromUrl(text);
+                sendLoadMeshFromUrl(text, active_layer);
             }
         });
 

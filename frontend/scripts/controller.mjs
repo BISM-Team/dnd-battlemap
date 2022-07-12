@@ -7,6 +7,7 @@ import { addOptionsPanel, removeOptionsPanel } from './ui.mjs';
 export let manifest;
 export let player;
 export let players = []; // Players
+export let active_layer = 1;
 
 export function setPlayer(name) {
     player = new Player(name);
@@ -14,6 +15,10 @@ export function setPlayer(name) {
 
 export function setPlayerList(_players) {
     players = _players;
+}
+
+export function setActiveLayer(l) {
+    active_layer = l;
 }
 
 export function resetScene() {

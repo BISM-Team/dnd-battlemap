@@ -12,6 +12,7 @@ export class Object {
                                 new Vector(0.0, 0.0, 0.0));
     meshUrl = '';
     lodNames = [];
+    layer = 0;
     visibleToAll = true;
     viewers = []; //Player
     owners = []; //Player
@@ -48,7 +49,7 @@ export class Object {
                 this.transform = new Transform( new Vector(0.0, defaultHeight, 0.0), 
                                                 new Vector(result.meshes[0].rotation._x, result.meshes[0].rotation._y, result.meshes[0].rotation._z), 
                                                 new Vector(result.meshes[0].scaling._x, result.meshes[0].scaling._y, result.meshes[0].scaling._z));
-                if(result.meshes[0].name == TERRAIN_NAME) { this.transform.location.y = 0.0; }
+                if(result.meshes[0].name == TERRAIN_NAME) { this.transform.location.y = 0.0; this.layer = 0; } // TODO send back to server ? maybe don't need to
             }
         }
         this.move(scene, this.transform);
@@ -163,13 +164,22 @@ export class SceneManifest {
     }
 
     getMeshNameFromLod(lodName) { 
-        let _name;
+        let _name = null;
         this.scene.forEach((object) => { 
             if(object && object.lodNames.find((name) => { return name && name==lodName; })) 
                 _name = object.name; 
         });
-        if(!_name) throw new Error('lod name not found');
         return _name;
+    }
+
+    getObjectFromLod(lodName) {
+        let obj = null;
+        this.scene.forEach((object) => { 
+            if(object && object.lodNames.find((name) => { return name && name==lodName; })) {
+                obj = object; 
+            }
+        });
+        return obj;
     }
 
     getAllMeshesFromLod(lodName) {
