@@ -99,9 +99,5 @@ export function removeOptionsPanel() {
     })
 }
 
-window.addEventListener("resize", () => {
-
-})
-
 let height = parseInt(canvas.getAttribute("height"));
 canvas.setAttribute("height", Math.round(height*0.94).toString())
