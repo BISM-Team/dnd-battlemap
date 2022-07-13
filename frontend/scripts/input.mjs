@@ -1,7 +1,7 @@
 import { engine, toggleShowFps, toggleShowDebug } from './scene.mjs'
 import { Vector, Transform, TERRAIN_NAME, CAMERA_NAME, defaultHeight } from './shared.mjs'
-import { sendRemoveMesh, sendMoveMeshTo, localUploadMesh, sendLoadMeshFromUrl } from './connection.mjs'
-import { manifest, onPickMesh, onStartMoveMesh, onUnpickMesh, active_layer } from './controller.mjs'
+import { sendRemoveObject, sendMoveObjTo, localUploadMesh, sendLoadMeshFromUrl, sendUpdateObject } from './connection.mjs'
+import { manifest, onPickMesh, onStartMoveMesh, onUnpickMesh, active_layer, setActiveLayer } from './controller.mjs'
 
 const canvas = document.querySelector("#renderCanvas");
 const fileInputs = document.getElementsByClassName("fileUpload");
@@ -27,7 +27,7 @@ let moved = false;
 
 function canPick(mesh) {
     let object;
-    return mesh.isPickable && (object=manifest.getObjectFromLod(mesh.name)) && object.layer == active_layer; // can only pick objects from active layer
+    return mesh.isPickable && (object=manifest.getObjectFromLod(mesh.name)) && (object.layer == active_layer || active_layer == -1); // can only pick objects from active layer
 }
 
 function canHit(mesh) {
@@ -100,8 +100,14 @@ export function addSceneBindings(scene) {
                 const endPos = new Vector(vec._x, vec._y-pickHeight, vec._z);
                 endPos.y = endPos.y > defaultHeight ? endPos.y : defaultHeight;
                 pickedMesh.position = new BABYLON.Vector3(endPos.x, endPos.y, endPos.z);
-                sendMoveMeshTo(pickedMesh.name, new Transform(endPos,   new Vector(pickedMesh.rotation._x, pickedMesh.rotation._y, pickedMesh.rotation._z), 
-                                                                        new Vector(pickedMesh.scaling._x, pickedMesh.scaling._y, pickedMesh.scaling._z)));
+                const picked_obj = manifest.getObjectFromLod(pickedMesh.name)
+                const transform = picked_obj.transform;
+                const new_transform = new Transform(    endPos,
+                                                        new Vector(transform.rotation.x, transform.rotation.y, transform.rotation.z), 
+                                                        new Vector(transform.scaling.x, transform.scaling.y, transform.scaling.z));
+                manifest.update_single_move(picked_obj.name, new_transform);
+                sendMoveObjTo(picked_obj.name, new_transform); 
+
             }
             const camera = scene.getCameraByName(CAMERA_NAME);
             camera.attachControl(canvas, true);
@@ -125,14 +131,14 @@ export function addSceneBindings(scene) {
                 case delKeyBind:
                     if(pickedMesh) {
                         onUnpickMesh(pickedMesh);
-                        sendRemoveMesh(pickedMesh.name);
+                        sendRemoveObject(manifest.getMeshNameFromLod(pickedMesh.name));
                         tmpPickedMesh = null;
                         pickedMesh = null;
                         moving = false;
                         moved = false;
                     }
                     break;
-    
+
                 case showFpsKeyBind:
                     toggleShowFps();
                     break;
@@ -143,17 +149,17 @@ export function addSceneBindings(scene) {
                     
                 case rotateKeyBind:
                     if(pickedMesh)
-                        rotateMesh(pickedMesh);
+                        rotateObject(manifest.getObjectFromLod(pickedMesh.name));
                     break;
                 
                 case scaleKeyBind:
                     if(pickedMesh)
-                        scaleUpMesh(pickedMesh);
+                        scaleUpObject(manifest.getObjectFromLod(pickedMesh.name));
                     break;
 
                 case unscaleKeyBind:
                     if(pickedMesh)
-                        scaleDownMesh(pickedMesh);
+                        scaleDownObject(manifest.getObjectFromLod(pickedMesh.name));
                     break;
 
                 default:
@@ -200,7 +206,7 @@ export function addSceneBindings(scene) {
             const text = event.dataTransfer.getData('text/plain');
             if(text) {
                 // validate
-                sendLoadMeshFromUrl(text, active_layer);
+                sendLoadMeshFromUrl(text, Math.max(0, active_layer));
             }
         });
 
@@ -210,35 +216,48 @@ export function addSceneBindings(scene) {
     }
 }
 
-export function rotateMesh(mesh) {
-    let new_y = mesh.rotation._y+rotationChange;
-    const new_transform = new Transform(    new Vector(mesh.position._x, mesh.position._y, mesh.position._z),   
-                                            new Vector(mesh.rotation._x, new_y, mesh.rotation._z), 
-                                            new Vector(mesh.scaling._x, mesh.scaling._y, mesh.scaling._z));
-    manifest.update_single_move(manifest.getMeshNameFromLod(mesh.name), new_transform);
-    sendMoveMeshTo(mesh.name, new_transform);
+export function rotateObject(obj) {
+    let transform = obj.transform;
+    const new_transform = new Transform(    new Vector(transform.location.x, transform.location.y, transform.location.z),   
+                                            new Vector(transform.rotation.x, transform.rotation.y+rotationChange, transform.rotation.z), 
+                                            new Vector(transform.scaling.x, transform.scaling.y, transform.scaling.z))
+    manifest.update_single_move(obj.name, new_transform);
+    sendMoveObjTo(obj.name, new_transform);
 }
 
-export function scaleUpMesh(mesh) {
-    const new_transform = new Transform(    new Vector(mesh.position._x, mesh.position._y, mesh.position._z),   
-                                            new Vector(mesh.rotation._x, mesh.rotation._y, mesh.rotation._z), 
-                                            new Vector(mesh.scaling._x+scaleChange, mesh.scaling._y+scaleChange, mesh.scaling._z+scaleChange));
-    manifest.update_single_move(manifest.getMeshNameFromLod(mesh.name), new_transform);
-    sendMoveMeshTo(mesh.name, new_transform);
+export function scaleUpObject(obj) {
+    let transform = obj.transform;
+    const new_transform = new Transform(    new Vector(transform.location.x, transform.location.y, transform.location.z),   
+                                            new Vector(transform.rotation.x, transform.rotation.y, transform.rotation.z), 
+                                            new Vector(transform.scaling.x+scaleChange, transform.scaling.y+scaleChange, transform.scaling.z+scaleChange))
+    manifest.update_single_move(obj.name, new_transform);
+    sendMoveObjTo(obj.name, new_transform);
 }
 
-export function scaleDownMesh(mesh) {
-    const new_transform = new Transform(    new Vector(mesh.position._x, mesh.position._y, mesh.position._z),   
-                                            new Vector(mesh.rotation._x, mesh.rotation._y, mesh.rotation._z), 
-                                            new Vector(mesh.scaling._x-scaleChange, mesh.scaling._y-scaleChange, mesh.scaling._z-scaleChange));
-    manifest.update_single_move(manifest.getMeshNameFromLod(mesh.name), new_transform);
-    sendMoveMeshTo(mesh.name, new_transform);
+export function scaleDownObject(obj) {
+    let transform = obj.transform;
+    const new_transform = new Transform(    new Vector(transform.location.x, transform.location.y, transform.location.z),   
+                                            new Vector(transform.rotation.x, transform.rotation.y, transform.rotation.z), 
+                                            new Vector(transform.scaling.x-scaleChange, transform.scaling.y-scaleChange, transform.scaling.z-scaleChange))
+    manifest.update_single_move(obj.name, new_transform);
+    sendMoveObjTo(obj.name, new_transform);
 }
 
-export function rotateToMesh() {
+export function rotateToObject() {
 
 }
 
-export function scaleToMesh() {
+export function scaleToObject() {
 
+}
+
+export function changeActiveLayer(l) {
+    if(pickedMesh && l>=0) {
+        const obj = manifest.getObjectFromLod(pickedMesh.name);
+        if(obj) {
+            obj.layer = l;
+            sendUpdateObject(obj.name, obj)
+        }
+    }
+    setActiveLayer(l);
 }

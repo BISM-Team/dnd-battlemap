@@ -114,19 +114,17 @@ export function sendLoadMeshFromUrl(filename, layer) {
     console.log('send load mesh ' + filename);
 }
 
-export function sendMoveMeshTo(lodName, transform) {
-    const name = manifest.getMeshNameFromLod(lodName);
-    socket.emit('client-move-mesh', name, transform);
-    console.log('send move mesh ' + name);
+export function sendMoveObjTo(obj_name, transform) {
+    socket.emit('client-move-mesh', obj_name, transform);
+    console.log('send move mesh ' + obj_name);
 }
 
-export function sendRemoveMesh(lodName) {
-    const name = manifest.getMeshNameFromLod(lodName);
-    socket.emit('client-remove-mesh', name);
-    console.log('send remove mesh ' + name);
+export function sendRemoveObject(obj_name) {
+    socket.emit('client-remove-mesh', obj_name);
+    console.log('send remove mesh ' + obj_name);
 }
 
-export function sendUpdateMesh(name, new_object) {
-    socket.emit('client-update-mesh', name, new_object);
-    console.log('send update mesh' + name);
+export function sendUpdateObject(obj_name, new_object) {
+    socket.emit('client-update-mesh', obj_name, new_object);
+    console.log('send update mesh' + obj_name);
 }

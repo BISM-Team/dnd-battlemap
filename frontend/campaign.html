@@ -19,7 +19,16 @@
     <div id="container">
         <div id="controlPanel">
             <label for="layerSelection">Layer:</label>
-            <input type="number" name="layer" id="layerSelection" value="1">
+            <input type="number" name="layer" id="layerSelection" value="1" min="-1" max="2">
+
+            <button id="rotate"><i class="material-icons">rotate_right</i></button>
+
+            <button id="scale"><i class="material-icons">transform</i></button>
+
+            <button id="visibility"><i class="material-icons">visibility</i></button>
+            <ul id="visibility-drop-down" class="hidden">
+                <label id="check-all"><input type="checkbox" name="all"  id="check-all-box" value="all"><span>All</span></label>
+            </ul>
         </div>
         <div id="scene">
             <div id="fps">0 fps</div>
@@ -30,17 +39,6 @@
             <button id="updateAssets"><i class="material-icons">refresh</i></button>
             <input id="addAssets" type="file" class="fileInput" ><i class="material-icons">add</i></input>
             <ul id="assetList"></ul>
-        </div>
-        <div id="optionsPanel">
-            <button id="rotate"><i class="material-icons">rotate_right</i></button>
-            <button id="scale"><i class="material-icons">transform</i></button>
-            <div>
-                <button id="visibility"><i class="material-icons">visibility</i></button>
-                <div id="visibility-drop-down" class="hidden">
-                    <label id="check-all"><input type="checkbox" name="all"  id="check-all-box" value="all"> <span>All</span></label>
-                    <ul id="player-checkboxes"></ul>
-                </div>
-            </div>
         </div>
     </div>
 

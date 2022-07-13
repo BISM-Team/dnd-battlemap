@@ -1,7 +1,6 @@
 import { resetScene as _resetScene, initScene, highlightMesh, unHighlightMesh } from './scene.mjs';
 import { Player, SceneManifest } from './manifest.mjs'
 import { addSceneBindings } from './input.mjs'
-import { TERRAIN_NAME } from './shared.mjs'
 import { addOptionsPanel, removeOptionsPanel } from './ui.mjs';
 
 export let manifest;
@@ -29,7 +28,6 @@ export function resetScene() {
 }
 
 export function onPickMesh(mesh) {
-    if(mesh == manifest._scene.getMeshByName(TERRAIN_NAME)) return;
     manifest.getAllMeshesFromLod(mesh.name).forEach(mesh => {
         highlightMesh(mesh);
     });
@@ -37,12 +35,10 @@ export function onPickMesh(mesh) {
 }
 
 export function onStartMoveMesh(mesh) {
-    if(mesh == manifest._scene.getMeshByName(TERRAIN_NAME)) return;
     removeOptionsPanel();
 }
 
 export function onUnpickMesh(mesh) {
-    if(mesh == manifest._scene.getMeshByName(TERRAIN_NAME)) return;
     manifest.getAllMeshesFromLod(mesh.name).forEach(mesh => {
         unHighlightMesh(mesh);
     });

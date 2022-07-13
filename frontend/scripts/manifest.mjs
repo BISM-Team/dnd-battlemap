@@ -26,6 +26,7 @@ export class Object {
         if(new_object !== undefined && manifest.find(this.name) === undefined) { await this.load(scene, manifest); }
         if(!new_object.transform.isEqual(this.transform)) this.move(scene, new_object.transform);
         this.show_hide(scene, new_object.visibleToAll, new_object.viewers, player);
+        this.update_other(new_object);
     }
 
     move(scene, transform) { 
@@ -49,7 +50,7 @@ export class Object {
                 this.transform = new Transform( new Vector(0.0, defaultHeight, 0.0), 
                                                 new Vector(result.meshes[0].rotation._x, result.meshes[0].rotation._y, result.meshes[0].rotation._z), 
                                                 new Vector(result.meshes[0].scaling._x, result.meshes[0].scaling._y, result.meshes[0].scaling._z));
-                if(result.meshes[0].name == TERRAIN_NAME) { this.transform.location.y = 0.0; this.layer = 0; } // TODO send back to server ? maybe don't need to
+                if(result.meshes[0].name == TERRAIN_NAME) { this.transform.location.y = 0.0; } // TODO send back to server ? maybe don't need to
             }
         }
         this.move(scene, this.transform);
@@ -78,8 +79,11 @@ export class Object {
                 meshes.forEach(mesh => { mesh.setEnabled(false); })
             }
         }
-        /* TODO show and hide lods (with animation?) */
     };
+
+    update_other(new_object) {
+        this.layer = new_object.layer;
+    }
 
     getLodMeshes(scene) {
         let lods = [];

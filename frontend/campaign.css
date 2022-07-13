@@ -13,18 +13,17 @@ body {
 }
 
 #scene {
-    height: 95%;
-    width: 100%;
+    flex: 1;
     position: relative;
 }
 
-#renderCanvas {
+#scene canvas {
     width: 100%;
     height: 100%;
     touch-action: none;
 }
 
-#fps {
+#scene #fps {
     position: absolute;
     background-color: rgb(0, 0, 0, 0);
     border: none;
@@ -37,8 +36,10 @@ body {
     height: 20px;
 }
 
+/* Control Panel */
+
 #controlPanel {
-    height: 5%;
+    height: 4em;
     width: 100%;
     padding: 0.5em 4em;
     display: flex;
@@ -46,57 +47,8 @@ body {
     align-items: center;
 }
 
-#controlPanel label {
+#controlPanel > * {
     margin-right: 0.5em;
-}
-
-#assetPicker {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: antiquewhite;
-    opacity: 0.95;
-    height: 100%;
-    transition: 0.5s;
-    top: 0%;
-    left: 100%;
-    z-index: 2;
-}
-
-#updateAssets {
-    transform: translateY(50%);
-}
-
-#assetPickerShower {
-    position: absolute;
-    top: 0%;
-    left: 0%;
-    transform: translate(-100%, 50%);
-}
-
-#assetPicker.slide-in {
-    animation: 0.5s;
-    transform: translateX(-100%);
-}
-
-#optionsPanel {
-    top: 1em;
-    right: 6em;
-    width: 10em;
-    position: absolute;
-    visibility: hidden;
-    opacity: 0;
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: center;
-    z-index: 1;
-}
-
-#optionsPanel > * {
-    margin-left: 5px;
-    margin-right: 5px;
 }
 
 #visibility-drop-down {
@@ -104,22 +56,18 @@ body {
     background-color: whitesmoke;
     visibility: hidden;
     opacity: 0;
-}
-
-#visibility-drop-down > label {
     display: flex;
-    padding-right: 8px;
-    white-space: nowrap;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    padding: 0px;
+    margin-top: 4px;
 }
 
-#visibility-drop-down > label span {
+#visibility-drop-down label span {
     margin-left: 3px;
     font-size: 14px;
 }
 
-#player-checkboxes > label {
+#visibility-drop-down label {
     display: flex;
     padding-right: 8px;
     white-space: nowrap;
@@ -127,20 +75,8 @@ body {
     justify-content: flex-start;
 }
 
-#player-checkboxes > label span {
-    margin-left: 3px;
-    font-size: 14px;
-}
-
-#check-all {
+#visibility-drop-down #check-all {
     border-bottom: 1px solid black;
-}
-
-#visibility-drop-down > ul {
-    display: flex;
-    flex-direction: column;
-    padding: 0px;
-    margin-top: 4px;
 }
 
 /* animations */
@@ -151,16 +87,6 @@ body {
 }
 
 #visibility-drop-down.hidden {
-    animation: hide 0.5s ease-in-out;
-    animation-fill-mode: forwards;
-}
-
-#optionsPanel.visible {
-    animation: show 0.5s ease-in-out;
-    animation-fill-mode: forwards;
-}
-
-#optionsPanel.hidden {
     animation: hide 0.5s ease-in-out;
     animation-fill-mode: forwards;
 }
@@ -193,4 +119,50 @@ body {
         opacity: 0;
         visibility: hidden;
     }
+}
+
+/* Asset Picker */
+
+#assetPicker {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: antiquewhite;
+    opacity: 0.95;
+    height: 100%;
+    transition: 0.5s;
+    top: 0%;
+    left: 100%;
+    z-index: 2;
+}
+
+#assetPicker.slide-in {
+    animation: 0.5s;
+    transform: translateX(-100%);
+}
+
+#assetPicker #updateAssets {
+    transform: translateY(50%);
+}
+
+#assetPicker #assetPickerShower {
+    position: absolute;
+    top: 0%;
+    left: 0%;
+    transform: translate(-100%, 50%);
+}
+
+#optionsPanel {
+    top: 1em;
+    right: 6em;
+    width: 10em;
+    position: absolute;
+    visibility: hidden;
+    opacity: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 1;
 }
