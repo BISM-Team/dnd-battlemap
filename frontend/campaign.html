@@ -18,26 +18,30 @@
 <body>
     <div id="container">
         <div id="controlPanel">
-            <label for="layerSelection">Layer:</label>
-            <input type="number" name="layer" id="layerSelection" value="1" min="-1" max="2">
+            <div id="layerContainer">
+                <button id="layerButton"><i class="material-icons">layers</i></button>
+                <input type="number" name="layer" id="layerSelection" value="1" min="-1" max="5">
+            </div>
 
-            <button id="rotate"><i class="material-icons">rotate_right</i></button>
+            <button id="rotate" disabled><i class="material-icons">rotate_right</i></button>
 
-            <button id="scale"><i class="material-icons">transform</i></button>
+            <button id="scale" disabled><i class="material-icons">transform</i></button>
 
-            <button id="visibility"><i class="material-icons">visibility</i></button>
-            <ul id="visibility-drop-down" class="hidden">
-                <label id="check-all"><input type="checkbox" name="all"  id="check-all-box" value="all"><span>All</span></label>
-            </ul>
+            <div id="visibilityContainer">
+                <button id="visibility" disabled><i class="material-icons">visibility</i></button>
+                <ul id="visibility-drop-down">
+                    <label id="check-all"><input type="checkbox" name="all"  id="check-all-box" value="all"><span>All</span></label>
+                </ul>
+            </div>
         </div>
         <div id="scene">
             <div id="fps">0 fps</div>
-            <canvas id="renderCanvas" touch-action="none"></canvas>
+            <canvas id="renderCanvas"></canvas>
         </div>
         <div id="assetPicker">
-            <button id="assetPickerShower"><i class="material-icons">chevron_left</i></button>
+            <button id="assetPickerShower"><i id="assetPickerShowerIcon" class="material-icons">chevron_left</i></button>
             <button id="updateAssets"><i class="material-icons">refresh</i></button>
-            <input id="addAssets" type="file" class="fileInput" ><i class="material-icons">add</i></input>
+            <input id="addAssets" type="file" class="fileInput" ></input>
             <ul id="assetList"></ul>
         </div>
     </div>

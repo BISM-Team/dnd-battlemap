@@ -39,130 +39,128 @@ body {
 /* Control Panel */
 
 #controlPanel {
-    height: 4em;
     width: 100%;
+    height: 5%;
     padding: 0.5em 4em;
     display: flex;
     flex-direction: row;
     align-items: center;
+    overflow: visible;
+    z-index: 1;
 }
 
 #controlPanel > * {
+    margin-left: 0.5em;
     margin-right: 0.5em;
 }
 
-#visibility-drop-down {
-    margin-top: 2px;
-    background-color: whitesmoke;
-    visibility: hidden;
-    opacity: 0;
+#controlPanel button {
+    height: 2.5em;
+    width: 3.5em;
+    text-align: center;
+}
+
+#layerContainer {
     display: flex;
     flex-direction: column;
-    padding: 0px;
-    margin-top: 4px;
-}
-
-#visibility-drop-down label span {
-    margin-left: 3px;
-    font-size: 14px;
-}
-
-#visibility-drop-down label {
-    display: flex;
-    padding-right: 8px;
-    white-space: nowrap;
     align-items: center;
-    justify-content: flex-start;
 }
 
-#visibility-drop-down #check-all {
+#layerContainer #layerSelection {
+    position: absolute;
+    top: 2.6em;
+    margin-top: 1.5em;
+    padding: 0.4em 0.5em;
+    text-align: center;
+    background-color: whitesmoke;
+    border: none;
+    
+    visibility: hidden;
+    opacity: 0;
+    transition: 0.3s ease-in-out;
+}
+
+#layerContainer #layerSelection.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+#visibilityContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#visibilityContainer #visibility-drop-down {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 2em;
+    margin-top: 1.5em;
+    padding: 0.5em 0.5em;
+    background-color: whitesmoke;
+    
+    visibility: hidden;
+    opacity: 0;
+    transition: 0.3s ease-in-out;
+}
+
+#visibilityContainer #visibility-drop-down.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+#visibilityContainer #visibility-drop-down #check-all {
     border-bottom: 1px solid black;
 }
 
-/* animations */
-
-#visibility-drop-down.visible {
-    animation: show 0.5s ease-in-out;
-    animation-fill-mode: forwards;
+#visibilityContainer #visibility-drop-down label span {
+    margin-left: 0.2em;
+    font-size: 14px;
 }
 
-#visibility-drop-down.hidden {
-    animation: hide 0.5s ease-in-out;
-    animation-fill-mode: forwards;
-}
-
-@keyframes show {
-    0% {
-        opacity: 0;
-        visibility: hidden;
-    }
-    1% {
-        opacity: 0;
-        visibility: visible;
-    }
-    100% {
-        opacity: 1;
-        visibility: visible;
-    }
-}
-
-@keyframes hide {
-    0% {
-        opacity: 1;
-        visibility: visible;
-    }
-    99% {
-        opacity: 0;
-        visibility: visible;
-    }
-    100% {
-        opacity: 0;
-        visibility: hidden;
-    }
+#visibilityContainer #visibility-drop-down label {
+    display: flex;
+    padding-right: 0.5em;
+    white-space: nowrap;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 /* Asset Picker */
 
 #assetPicker {
     position: absolute;
+    height: 100%;
+    top: 0%;
+    left: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     background-color: antiquewhite;
-    opacity: 0.95;
-    height: 100%;
-    transition: 0.5s;
-    top: 0%;
-    left: 100%;
+    opacity: 1;
     z-index: 2;
+    transition: 0.5s;
+}
+
+#assetPicker > * {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
 }
 
 #assetPicker.slide-in {
-    animation: 0.5s;
     transform: translateX(-100%);
 }
 
-#assetPicker #updateAssets {
-    transform: translateY(50%);
+#assetPicker #assetList {
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 #assetPicker #assetPickerShower {
     position: absolute;
     top: 0%;
     left: 0%;
+    margin: 0;
     transform: translate(-100%, 50%);
-}
-
-#optionsPanel {
-    top: 1em;
-    right: 6em;
-    width: 10em;
-    position: absolute;
-    visibility: hidden;
-    opacity: 0;
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: center;
-    z-index: 1;
 }

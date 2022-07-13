@@ -2,18 +2,20 @@ import { scaleUpObject, scaleDownObject, rotateObject, changeActiveLayer } from 
 import { manifest, player, players } from "./controller.mjs";
 import { sendUpdateObject } from "./connection.mjs"
 
+const canvas = document.getElementById("renderCanvas");
+const layer_btn = document.getElementById("layerButton");
 const rotate_btn = document.getElementById("rotate");
 const scale_btn = document.getElementById("scale");
 const visibility_btn = document.getElementById("visibility");
 const check_all_box = document.getElementById("check-all-box");
 const visibility_dropdown = document.getElementById("visibility-drop-down");
-const layerSelection = document.getElementById("layerSelection");
+const layer_selection = document.getElementById("layerSelection");
+const object_control_buttons = [rotate_btn, scale_btn, visibility_btn];
 
 let obj=null;
 
 function updateVisibilityDropdown() {
     visibility_dropdown.classList.toggle("visible");
-    visibility_dropdown.classList.toggle("hidden");
     check_all_box.checked = obj.visibleToAll;
     while (visibility_dropdown.childElementCount > 1) {
         visibility_dropdown.removeChild(visibility_dropdown.lastChild);
@@ -38,11 +40,19 @@ function updateVisibilityDropdown() {
     });
 }
 
+layer_btn.addEventListener('contextmenu', e => e.preventDefault());
+
 rotate_btn.addEventListener('contextmenu', e => e.preventDefault());
 
 scale_btn.addEventListener('contextmenu', e => e.preventDefault());
 
 visibility_btn.addEventListener('contextmenu', e => e.preventDefault());
+
+layer_btn.addEventListener("mousedown", ev => {
+    ev.preventDefault();
+    layer_selection.classList.toggle("visible");
+});
+
 
 rotate_btn.addEventListener("mousedown", ev => {
     ev.preventDefault();
@@ -60,8 +70,8 @@ scale_btn.addEventListener("mousedown", ev => {
 
 visibility_btn.addEventListener("mousedown", updateVisibilityDropdown);
 
-layerSelection.addEventListener("change", () => {
-    changeActiveLayer(parseInt(layerSelection.value));
+layer_selection.addEventListener("change", () => {
+    changeActiveLayer(parseInt(layer_selection.value));
 });
 
 check_all_box.addEventListener("change", () => {
@@ -76,12 +86,22 @@ async function updateObj(obj) {
 
 export function addOptionsPanel(_mesh) {
     obj = manifest.getObjectFromLod(_mesh.name);
-    document.getElementById("visibility-drop-down").classList.remove("visible");
-    if(!document.getElementById("visibility-drop-down").classList.contains("hidden"))
-        document.getElementById("visibility-drop-down").classList.add("hidden");
+    visibility_dropdown.classList.remove("visible");
+    object_control_buttons.forEach( item => {
+        item.removeAttribute("disabled");
+    })
 }
 
 export function removeOptionsPanel() {
-    document.getElementById("visibility-drop-down").classList.remove("visible");
-    document.getElementById("visibility-drop-down").classList.add("hidden");
+    visibility_dropdown.classList.remove("visible");
+    object_control_buttons.forEach( item => {
+        item.setAttribute("disabled", "");
+    })
 }
+
+window.addEventListener("resize", () => {
+
+})
+
+let height = parseInt(canvas.getAttribute("height"));
+canvas.setAttribute("height", Math.round(height*0.94).toString())
