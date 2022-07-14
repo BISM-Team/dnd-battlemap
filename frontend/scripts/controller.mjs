@@ -23,24 +23,24 @@ export function setActiveLayer(l) {
 export function resetScene() {
     const scene = _resetScene(manifest ? manifest.scene : undefined);
     manifest = new SceneManifest(scene);
-    addSceneBindings(scene);
+    addSceneBindings();
     initScene(scene);
 }
 
-export function onPickMesh(mesh) {
-    manifest.getAllMeshesFromLod(mesh.name).forEach(mesh => {
-        highlightMesh(mesh);
+export function onPickObj(obj) {
+    obj.lodNames.forEach(name => {
+        highlightMesh(manifest._scene.getMeshByName(name));
     });
-    addOptionsPanel(mesh);
+    addOptionsPanel(obj);
 }
 
-export function onStartMoveMesh(mesh) {
+export function onStartMoveObj(obj) {
     removeOptionsPanel();
 }
 
-export function onUnpickMesh(mesh) {
-    manifest.getAllMeshesFromLod(mesh.name).forEach(mesh => {
-        unHighlightMesh(mesh);
+export function onUnpickObj(obj) {
+    obj.lodNames.forEach(name => {
+        unHighlightMesh(manifest._scene.getMeshByName(name));
     });
     removeOptionsPanel();
 }

@@ -84,8 +84,8 @@ async function updateObj(obj) {
     sendUpdateObject(obj.name, obj);
 }
 
-export function addOptionsPanel(_mesh) {
-    obj = manifest.getObjectFromLod(_mesh.name);
+export function addOptionsPanel(object) {
+    obj = object;
     visibility_dropdown.classList.remove("visible");
     object_control_buttons.forEach( item => {
         item.removeAttribute("disabled");

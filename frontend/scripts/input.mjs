@@ -1,7 +1,7 @@
 import { engine, toggleShowFps, toggleShowDebug } from './scene.mjs'
 import { Vector, Transform, TERRAIN_NAME, CAMERA_NAME, defaultHeight } from './shared.mjs'
 import { sendRemoveObject, sendMoveObjTo, localUploadMesh, sendLoadMeshFromUrl, sendUpdateObject } from './connection.mjs'
-import { manifest, onPickMesh, onStartMoveMesh, onUnpickMesh, active_layer, setActiveLayer } from './controller.mjs'
+import { manifest, onPickObj, onStartMoveObj, onUnpickObj, active_layer, setActiveLayer } from './controller.mjs'
 
 const canvas = document.querySelector("#renderCanvas");
 const fileInputs = document.getElementsByClassName("fileUpload");
@@ -20,8 +20,8 @@ export let scaleChange = 0.05;
 
 let dom_init = false;
 
-export let pickedMesh = null;
-let tmpPickedMesh = null;
+let pickedObj = null;
+let tmpPickedObj = null;
 let moving = false;
 let moved = false;
 
@@ -32,91 +32,92 @@ function canPick(mesh) {
 
 function canHit(mesh) {
     let object;
-    return mesh!=pickedMesh && mesh.isPickable && (object=manifest.getObjectFromLod(mesh.name)) && object.layer < active_layer; // picked objects can only interact with lower layers
+    return mesh.isPickable && (object=manifest.getObjectFromLod(mesh.name)) && object!=pickedObj && object.layer < active_layer; // picked objects can only interact with lower layers
 }
 
-export function addSceneBindings(scene) {
-    pickedMesh = null;
-    tmpPickedMesh = null;
+export function addSceneBindings() {
+    pickedObj = null;
+    tmpPickedObj = null;
     moving = false;
     moved = false;
 
-    scene.onPointerDown = function (evt, pickResult) {
+    manifest._scene.onPointerDown = function (evt, pickResult) {
         if(evt.button == 2) return;
 
-        const pick = scene.pickWithRay(pickResult.ray, canPick);
+        const pick = manifest._scene.pickWithRay(pickResult.ray, canPick);
         if (pick.hit) {
-            if(pickedMesh && pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
-                tmpPickedMesh = pick.pickedMesh;
+            const picked = manifest.getObjectFromLod(pick.pickedMesh.name);
+            if(pickedObj && pickedObj != manifest.getObjectFromLod(TERRAIN_NAME)) {
+                tmpPickedObj = picked;
             } else {
-                tmpPickedMesh = null; 
-                pickedMesh = pick.pickedMesh;
-                onPickMesh(pickedMesh);
+                tmpPickedObj = null; 
+                pickedObj = picked;
+                onPickObj(pickedObj);
             }
-            if (pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
+            if (pickedObj != manifest.getObjectFromLod(TERRAIN_NAME)) {
                 moving = true;
                 moved = false;
-                const camera = scene.getCameraByName(CAMERA_NAME);
+                const camera = manifest._scene.getCameraByName(CAMERA_NAME);
                 camera.detachControl(canvas);
             }
         }
         else {
-            if(pickedMesh) onUnpickMesh(pickedMesh);
+            if(pickedObj) onUnpickObj(pickedObj);
             moving = false;
             moved = false;
-            tmpPickedMesh = null;
-            pickedMesh = null; // deselect if clicking nothing
+            tmpPickedObj = null;
+            pickedObj = null; // deselect if clicking nothing
         }
     };
 
-    scene.onPointerMove = function (evt, pickResult) {
+    manifest._scene.onPointerMove = function (evt, pickResult) {
         if(moving) {
-            const pick = scene.pickWithRay(pickResult.ray, canHit);
+            const pick = manifest._scene.pickWithRay(pickResult.ray, canHit);
             if(pick.pickedMesh) {
-                onStartMoveMesh(pickedMesh);
+                if(!moved) onStartMoveObj(pickedObj);
                 moved = true;
                 pick.pickedPoint._y += pickHeight;
-                pickedMesh.position = new BABYLON.Vector3(pick.pickedPoint._x, pick.pickedPoint._y, pick.pickedPoint._z);
+                manifest._scene.getMeshByName(pickedObj.lodNames[0]).position = new BABYLON.Vector3(pick.pickedPoint._x, pick.pickedPoint._y, pick.pickedPoint._z);
             }
         }
     }
 
-    scene.onPointerUp = function (evt, pickResult) {
-        if(tmpPickedMesh && !moved) {
-            onUnpickMesh(pickedMesh);
-            pickedMesh = tmpPickedMesh;
-            tmpPickedMesh = null;
-            onPickMesh(pickedMesh);
-            if (pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
+    manifest._scene.onPointerUp = function (evt, pickResult) {
+        if(tmpPickedObj && !moved) {
+            onUnpickObj(pickedObj);
+            pickedObj = tmpPickedObj;
+            tmpPickedObj = null;
+            onPickObj(pickedObj);
+            if (pickedObj != manifest.getObjectFromLod(TERRAIN_NAME)) {
                 moving = true;
                 moved = false;
-                const camera = scene.getCameraByName(CAMERA_NAME);
+                const camera = manifest._scene.getCameraByName(CAMERA_NAME);
                 camera.detachControl(canvas);
             }
         }
-        if(pickedMesh && moved) {
-            if (pickedMesh != scene.getMeshByName(TERRAIN_NAME)) {
-                const vec = pickedMesh.position;
+        if(pickedObj && moved) {
+            if (pickedObj != manifest.getObjectFromLod(TERRAIN_NAME)) {
+                const root_mesh = manifest._scene.getMeshByName(pickedObj.lodNames[0]);
+                const vec = root_mesh.position;
                 const endPos = new Vector(vec._x, vec._y-pickHeight, vec._z);
                 endPos.y = endPos.y > defaultHeight ? endPos.y : defaultHeight;
-                pickedMesh.position = new BABYLON.Vector3(endPos.x, endPos.y, endPos.z);
-                const picked_obj = manifest.getObjectFromLod(pickedMesh.name)
-                const transform = picked_obj.transform;
+                root_mesh.position = new BABYLON.Vector3(endPos.x, endPos.y, endPos.z);
+                const transform = pickedObj.transform;
                 const new_transform = new Transform(    endPos,
                                                         new Vector(transform.rotation.x, transform.rotation.y, transform.rotation.z), 
                                                         new Vector(transform.scaling.x, transform.scaling.y, transform.scaling.z));
-                manifest.update_single_move(picked_obj.name, new_transform);
-                sendMoveObjTo(picked_obj.name, new_transform); 
+                manifest.update_single_move(pickedObj.name, new_transform);
+                sendMoveObjTo(pickedObj.name, new_transform); 
 
             }
-            const camera = scene.getCameraByName(CAMERA_NAME);
+            const camera = manifest._scene.getCameraByName(CAMERA_NAME);
             camera.attachControl(canvas, true);
-            onUnpickMesh(pickedMesh);
-            tmpPickedMesh = null;
-            pickedMesh = null;
+            onUnpickObj(pickedObj);
+            tmpPickedObj = null;
+            pickedObj = null;
         }
         else if(moving) {
-            const camera = scene.getCameraByName(CAMERA_NAME);
+            const camera = manifest._scene.getCameraByName(CAMERA_NAME);
             camera.attachControl(canvas, true);
         }
         moving = false;
@@ -129,11 +130,11 @@ export function addSceneBindings(scene) {
             switch(e.key) 
             {
                 case delKeyBind:
-                    if(pickedMesh) {
-                        onUnpickMesh(pickedMesh);
-                        sendRemoveObject(manifest.getMeshNameFromLod(pickedMesh.name));
-                        tmpPickedMesh = null;
-                        pickedMesh = null;
+                    if(pickedObj) {
+                        onUnpickObj(pickedObj);
+                        sendRemoveObject(pickedObj.name);
+                        tmpPickedObj = null;
+                        pickedObj = null;
                         moving = false;
                         moved = false;
                     }
@@ -148,18 +149,18 @@ export function addSceneBindings(scene) {
                     break;
                     
                 case rotateKeyBind:
-                    if(pickedMesh)
-                        rotateObject(manifest.getObjectFromLod(pickedMesh.name));
+                    if(pickedObj)
+                        rotateObject(pickedObj);
                     break;
                 
                 case scaleKeyBind:
-                    if(pickedMesh)
-                        scaleUpObject(manifest.getObjectFromLod(pickedMesh.name));
+                    if(pickedObj)
+                        scaleUpObject(pickedObj);
                     break;
 
                 case unscaleKeyBind:
-                    if(pickedMesh)
-                        scaleDownObject(manifest.getObjectFromLod(pickedMesh.name));
+                    if(pickedObj)
+                        scaleDownObject(pickedObj);
                     break;
 
                 default:
@@ -206,7 +207,7 @@ export function addSceneBindings(scene) {
             const text = event.dataTransfer.getData('text/plain');
             if(text) {
                 // validate
-                sendLoadMeshFromUrl(text, Math.max(0, active_layer));
+                if(active_layer>=0) sendLoadMeshFromUrl(text, active_layer);
             }
         });
 
@@ -252,12 +253,9 @@ export function scaleToObject() {
 }
 
 export function changeActiveLayer(l) {
-    if(pickedMesh && l>=0) {
-        const obj = manifest.getObjectFromLod(pickedMesh.name);
-        if(obj) {
-            obj.layer = l;
-            sendUpdateObject(obj.name, obj)
-        }
+    if(pickedObj && l>=0) {
+        pickedObj.layer = l;
+        sendUpdateObject(pickedObj.name, pickedObj)
     }
     setActiveLayer(l);
 }
