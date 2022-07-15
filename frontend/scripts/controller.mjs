@@ -1,7 +1,6 @@
 import { resetScene as _resetScene, initScene, highlightMesh, unHighlightMesh } from './scene.mjs';
 import { Player, SceneManifest } from './manifest.mjs'
-import { addSceneBindings } from './input.mjs'
-import { addOptionsPanel, removeOptionsPanel } from './ui.mjs';
+import { addStandardSceneBindings, ui_standard_input } from './input.mjs'
 
 export let manifest;
 export let player;
@@ -23,7 +22,7 @@ export function setActiveLayer(l) {
 export function resetScene() {
     const scene = _resetScene(manifest ? manifest.scene : undefined);
     manifest = new SceneManifest(scene);
-    addSceneBindings();
+    addStandardSceneBindings();
     initScene(scene);
 }
 
@@ -31,16 +30,16 @@ export function onPickObj(obj) {
     obj.lodNames.forEach(name => {
         highlightMesh(manifest._scene.getMeshByName(name));
     });
-    addOptionsPanel(obj);
+    if(ui_standard_input.enabled) ui_standard_input.addOptionsPanel(obj);
 }
 
 export function onStartMoveObj(obj) {
-    removeOptionsPanel();
+    if(ui_standard_input.enabled) ui_standard_input.removeOptionsPanel();
 }
 
 export function onUnpickObj(obj) {
     obj.lodNames.forEach(name => {
         unHighlightMesh(manifest._scene.getMeshByName(name));
     });
-    removeOptionsPanel();
+    if(ui_standard_input.enabled) ui_standard_input.removeOptionsPanel();
 }

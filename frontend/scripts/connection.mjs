@@ -39,24 +39,24 @@ export function connectToRoom(room, name) {
         console.log('scene load client ' + url);
     });
     
-    socket.on('load-mesh', async (name, object) => {
+    socket.on('load-object', async (name, object) => {
         if(object) { object.__proto__ = Object.prototype; object.fix_protos(); }
         manifest.update_single(name, object, player);
         console.log('client mesh loaded ' + name);
     });
     
-    socket.on('remove-mesh', (name) => {
+    socket.on('remove-object', (name) => {
         manifest.update_single(name, undefined, player);
         console.log('client removed mesh ' + name);
     });
     
-    socket.on('move-mesh', (name, transform) => {
+    socket.on('move-object', (name, transform) => {
         if(transform) { transform.__proto__ = Transform.prototype; transform.fix_protos(); }
         manifest.update_single_move(name, transform);
         console.log('client mesh moved ' + name);
     });
 
-    socket.on('update-mesh', (name, new_obj) => {
+    socket.on('update-object', (name, new_obj) => {
         if(new_obj) { new_obj.__proto__ = Object.prototype; new_obj.fix_protos(); }
         manifest.update_single(name, new_obj, player);
         console.log('client mesh updated ' + name);
@@ -95,7 +95,6 @@ export function localUploadMesh(file) {
             req.setRequestHeader('Content-type', 'text/plain');
             req.send(`${chunks[i]}`);
 
-            //socket.emit('client-stream-mesh-chunk', file.name, i, chunks[i]);
             ++i;
         }
 
@@ -103,28 +102,27 @@ export function localUploadMesh(file) {
         req.open('POST', `/assets/${file.name}?i=${i}&data=${false}`);
         req.send();
 
-        //socket.emit('client-stream-mesh-last-chunk-index', file.name, i);
         console.log('stream-file ' + file.name);
     }
     reader.readAsText(file);
 }
 
 export function sendLoadMeshFromUrl(filename, layer) {
-    socket.emit('client-load-mesh', filename, layer);
+    socket.emit('client-load-object', filename, layer);
     console.log('send load mesh ' + filename);
 }
 
 export function sendMoveObjTo(obj_name, transform) {
-    socket.emit('client-move-mesh', obj_name, transform);
+    socket.emit('client-move-object', obj_name, transform);
     console.log('send move mesh ' + obj_name);
 }
 
 export function sendRemoveObject(obj_name) {
-    socket.emit('client-remove-mesh', obj_name);
+    socket.emit('client-remove-object', obj_name);
     console.log('send remove mesh ' + obj_name);
 }
 
 export function sendUpdateObject(obj_name, new_object) {
-    socket.emit('client-update-mesh', obj_name, new_object);
+    socket.emit('client-update-object', obj_name, new_object);
     console.log('send update mesh' + obj_name);
 }

@@ -34,5 +34,14 @@ router.get('/:dirname/:filename', async (req, res) => {
     }
 });
 
+router.get('/:dirname/:second_dirname/:filename', async (req, res) => {
+    const file = path.join(__dirname, '../../frontend/', req.params.dirname, '/', req.params.second_dirname, '/', req.params.filename);
+    try {
+        res.sendFile(file);
+    } catch (ex) {
+        throw new Error(404);
+    }
+});
+
 
 module.exports = router;

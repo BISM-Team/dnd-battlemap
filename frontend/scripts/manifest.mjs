@@ -11,7 +11,7 @@ export class Object {
                                 new Vector(0.0, 0.0, 0.0), 
                                 new Vector(0.0, 0.0, 0.0));
     meshUrl = '';
-    lodNames = [];
+    lodNames = []; // String
     layer = 0;
     visibleToAll = true;
     viewers = []; //Player

@@ -23,11 +23,6 @@ if(room && name) {
 
 function showAssetPicker() {
     document.getElementById("assetPicker").classList.toggle("slide-in");
-    if(document.getElementById("assetPicker").classList.contains("slide-in")) {
-        document.getElementById("assetPickerShowerIcon").innerHTML = "chevron_right";
-    } else {
-        document.getElementById("assetPickerShowerIcon").innerHTML = "chevron_left";
-    }
 }
 
 function updateAssets() {

@@ -93,35 +93,35 @@ function onJoinRoom(instance, socket) {
     console.log(instance.room +': client connected');
     socket.emit('load-scene', SCENE_LOC, filterSceneOut(manifest));
 
-    socket.on('client-load-mesh', async (filename, layer) => {
+    socket.on('client-load-object', async (filename, layer) => {
         const new_object = new _Object(player);
         new_object.name = filename;
         new_object.meshUrl = `assets/${filename}`;
         new_object.layer = layer;
         manifest.add(new_object);
 
-        io.to(room).emit('load-mesh', new_object.name, new_object);
+        io.to(room).emit('load-object', new_object.name, new_object);
         console.log(instance.room +': mesh loaded ' + new_object.name);
     });
 
-    socket.on('client-remove-mesh', (name) => {
-        io.to(room).emit('remove-mesh', name);
+    socket.on('client-remove-object', (name) => {
+        io.to(room).emit('remove-object', name);
         manifest.update_single(name, undefined, player);
         console.log(instance.room +': removed mesh ' + name);
     });
 
-    socket.on('client-move-mesh', (name, transform) => {
+    socket.on('client-move-object', (name, transform) => {
         if(transform) { transform.__proto__ = Transform.prototype; transform.fix_protos(); }
-        socket.to(room).emit('move-mesh', name, transform);
+        socket.to(room).emit('move-object', name, transform);
         manifest.update_single_move(name, transform);
         console.log(instance.room +': mesh moved ' + name);
     });
 
-    socket.on('client-update-mesh', (name, new_object) => {
+    socket.on('client-update-object', (name, new_object) => {
         if(!new_object || !manifest.find(name)) throw new Error('update undefined object, use other functions');
         new_object.__proto__ = _Object.prototype; 
         new_object.fix_protos();
-        socket.to(room).emit('update-mesh', name, new_object);
+        socket.to(room).emit('update-object', name, new_object);
         manifest.update_single(name, new_object, player);
         console.log(instance.room + ': mesh updated ' + name);
     });
