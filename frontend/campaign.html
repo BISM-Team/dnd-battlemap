@@ -20,7 +20,7 @@
         <div id="controlPanel">
             <div id="layerContainer">
                 <button id="layerButton"><i class="material-icons">layers</i></button>
-                <input type="number" name="layer" id="layerSelection" value="1" min="-1" max="5">
+                <input type="number" name="layer" id="layerSelection" value="2" min="-1" max="5">
             </div>
 
             <button id="rotate" disabled><i class="material-icons">rotate_right</i></button>
@@ -30,8 +30,18 @@
             <div id="visibilityContainer">
                 <button id="visibility" disabled><i class="material-icons">visibility</i></button>
                 <ul id="visibility-drop-down">
-                    <label id="check-all"><input type="checkbox" name="all"  id="check-all-box" value="all"><span>All</span></label>
+                    <label id="check-all"><input type="checkbox" name="all" id="check-all-box" value="all"><span>All</span></label>
                 </ul>
+            </div>
+
+            <div id="inputModeContainer">
+                <button id="inputMode"><i class="material-icons">menu</i></button>
+                <form action="none" id="inputModeDropdown">
+                    <input type="radio" name="inputMode" id="standardRadio" value="standard" checked>
+                    <label for="standardRadio"><i class="material-icons">near_me</i></label>
+                    <input type="radio" name="inputMode" id="lineRadio" value="line">
+                    <label for="lineRadio"><i class="material-icons">edit</i></label>
+                </form>
             </div>
         </div>
         <div id="scene">

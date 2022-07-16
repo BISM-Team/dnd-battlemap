@@ -1,5 +1,5 @@
 import { manifest, player, players, setPlayer, setPlayerList, resetScene } from './controller.mjs'
-import { SceneManifest, Object, Player } from './manifest.mjs'
+import { SceneManifest, Object, Player, Line } from './manifest.mjs'
 import { Transform } from './shared.mjs'
 
 let socket;
@@ -42,24 +42,37 @@ export function connectToRoom(room, name) {
     socket.on('load-object', async (name, object) => {
         if(object) { object.__proto__ = Object.prototype; object.fix_protos(); }
         manifest.update_single(name, object, player);
-        console.log('client mesh loaded ' + name);
+        console.log('client object loaded ' + name);
     });
     
     socket.on('remove-object', (name) => {
         manifest.update_single(name, undefined, player);
-        console.log('client removed mesh ' + name);
+        console.log('client removed object ' + name);
     });
     
     socket.on('move-object', (name, transform) => {
         if(transform) { transform.__proto__ = Transform.prototype; transform.fix_protos(); }
         manifest.update_single_move(name, transform);
-        console.log('client mesh moved ' + name);
+        console.log('client object moved ' + name);
     });
 
     socket.on('update-object', (name, new_obj) => {
         if(new_obj) { new_obj.__proto__ = Object.prototype; new_obj.fix_protos(); }
         manifest.update_single(name, new_obj, player);
-        console.log('client mesh updated ' + name);
+        console.log('client object updated ' + name);
+    });
+    
+    socket.on('update-line', (owner, new_line) => {
+        if(owner) owner.__proto__ = Player.prototype;
+        if(new_line) { new_line.__proto__ = Line.prototype; new_line.fix_protos(); }
+        manifest.updateLine(owner, new_line, player);
+        // console.log('client line updated ' + owner.name); // 100 times a second lol
+    });
+
+    socket.on('remove-line', (owner) => {
+        if(owner) owner.__proto__ = Player.prototype;
+        manifest.updateLine(owner, undefined, player);
+        console.log('client line removed ' + owner.name);
     });
     
     socket.on('connect', () => {
@@ -125,4 +138,14 @@ export function sendRemoveObject(obj_name) {
 export function sendUpdateObject(obj_name, new_object) {
     socket.emit('client-update-object', obj_name, new_object);
     console.log('send update mesh' + obj_name);
+}
+
+export function sendCreateLine(line) {
+    socket.emit('client-update-line', player, line);
+    // console.log('send create line'); // 100 times a second lol
+}
+
+export function sendRemoveLine() {
+    socket.emit('client-remove-line', player);
+    console.log('send remove line');
 }

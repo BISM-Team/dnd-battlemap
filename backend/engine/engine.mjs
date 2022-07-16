@@ -3,8 +3,8 @@ import LOADERS from 'babylonjs-loaders'
 import xhr2 from 'xhr2'
 global.XMLHttpRequest = xhr2.XMLHttpRequest;
 
-import { Transform, Vector, defaultHeight, buildLods, sortMeshes, TERRAIN_NAME } from '../../frontend/scripts/shared.mjs'
-import { Player, SceneManifest, Object as _Object } from '../../frontend/scripts/manifest.mjs'
+import { Transform } from '../../frontend/scripts/shared.mjs'
+import { Player, SceneManifest, Object as _Object, Line } from '../../frontend/scripts/manifest.mjs'
 
 BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING;
 
@@ -101,20 +101,20 @@ function onJoinRoom(instance, socket) {
         manifest.add(new_object);
 
         io.to(room).emit('load-object', new_object.name, new_object);
-        console.log(instance.room +': mesh loaded ' + new_object.name);
+        console.log(instance.room +': object loaded ' + new_object.name);
     });
 
     socket.on('client-remove-object', (name) => {
         io.to(room).emit('remove-object', name);
         manifest.update_single(name, undefined, player);
-        console.log(instance.room +': removed mesh ' + name);
+        console.log(instance.room +': removed object ' + name);
     });
 
     socket.on('client-move-object', (name, transform) => {
         if(transform) { transform.__proto__ = Transform.prototype; transform.fix_protos(); }
         socket.to(room).emit('move-object', name, transform);
         manifest.update_single_move(name, transform);
-        console.log(instance.room +': mesh moved ' + name);
+        console.log(instance.room +': object moved ' + name);
     });
 
     socket.on('client-update-object', (name, new_object) => {
@@ -123,7 +123,23 @@ function onJoinRoom(instance, socket) {
         new_object.fix_protos();
         socket.to(room).emit('update-object', name, new_object);
         manifest.update_single(name, new_object, player);
-        console.log(instance.room + ': mesh updated ' + name);
+        console.log(instance.room + ': object updated ' + name);
+    });
+
+    socket.on('client-update-line', (owner, new_line) => {
+        if(owner) owner.__proto__ = Player.prototype;
+        if(new_line) new_line.__proto__ = Line.prototype; 
+        new_line.fix_protos();
+        socket.to(room).emit('update-line', owner, new_line);
+        manifest.updateLine(owner, new_line, player);
+        console.log(instance.room + ': line updated ' + owner.name);
+    });
+
+    socket.on('client-remove-line', (owner) => {
+        if(owner) owner.__proto__ = Player.prototype;
+        io.to(room).emit('remove-line', owner);
+        manifest.updateLine(owner, undefined, player);
+        console.log(instance.room +': line removed ' + owner.name);
     });
 
     socket.on('disconnect', (reason) => {

@@ -16,7 +16,7 @@ export class FileInput {
     }
     
     enable() {
-        this.canvas = document.querySelector("#renderCanvas");
+        this.canvas = document.getElementById("renderCanvas");
         this.fileInputs = document.getElementsByClassName("fileUpload");
     
         this.canvas.addEventListener('dragover', this.fileInputOnDragOver);

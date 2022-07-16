@@ -1,7 +1,7 @@
 import { toggleShowFps, toggleShowDebug } from '../scene.mjs'
 import { Vector, Transform, TERRAIN_NAME, CAMERA_NAME, defaultHeight } from '../shared.mjs'
 import { sendRemoveObject, sendMoveObjTo, sendUpdateObject } from '../connection.mjs'
-import { manifest, onPickObj, onStartMoveObj, onUnpickObj, active_layer, setActiveLayer } from '../controller.mjs'
+import { manifest, onPickObj, onStartMoveObj, onUnpickObj, active_layer } from '../controller.mjs'
 
 export class StandardSceneInput {
     enabled=false;
@@ -41,7 +41,6 @@ export class StandardSceneInput {
     }
 
     enable() {
-        this.canvas = document.querySelector("#renderCanvas");
         this.pickedObj = null;
         this.tmpPickedObj = null;
         this.moving = false;
@@ -50,11 +49,15 @@ export class StandardSceneInput {
         manifest._scene.onPointerDown = this.onPointerDown;
         manifest._scene.onPointerMove = this.onPointerMove;
         manifest._scene.onPointerUp   = this.onPointerUp;
+
+        this.canvas = document.getElementById("renderCanvas");
         this.canvas.addEventListener('keydown', this.onKeyDown);
+
         this.enabled = true;
     }
 
     disable() {
+        if(this.pickedObj) onUnpickObj(this.pickedObj);
         this.pickedObj = null;
         this.tmpPickedObj = null;
         this.moving = false;
@@ -63,8 +66,12 @@ export class StandardSceneInput {
         manifest._scene.onPointerUp   = () => {};
         manifest._scene.onPointerMove = () => {};
         manifest._scene.onPointerDown = () => {};
+
         this.canvas.removeEventListener('keydown', this.onKeyDown);
+        const camera = manifest._scene.getCameraByName(CAMERA_NAME);
+        camera.attachControl(this.canvas);
         this.canvas = null;
+
         this.enabled = false;
     }
     
@@ -248,7 +255,6 @@ export class StandardSceneInput {
             this.pickedObj.layer = l;
             sendUpdateObject(this.pickedObj.name, this.pickedObj);
         }
-        setActiveLayer(l);
     }
 
 }

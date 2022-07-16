@@ -130,6 +130,44 @@ body {
     justify-content: flex-start;
 }
 
+#inputModeContainer #inputModeDropdown {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    position: absolute;
+    top: 2em;
+    margin-top: 1.5em;
+    margin-left: -1em;
+    padding: 0em;
+    background-color: whitesmoke;
+
+    visibility: hidden;
+    opacity: 0;
+    transition: var(--control-panel--transition);
+}
+
+#inputModeContainer #inputModeDropdown.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+#inputModeContainer #inputModeDropdown input {
+    position: absolute;
+    left: -999em;
+    visibility: hidden;
+}
+
+#inputModeContainer #inputModeDropdown label {
+    border: 0.5px solid wheat;
+    padding: 0.2em 0.4em;
+    transition: var(--control-panel--transition);
+    background-color: whitesmoke;
+}
+
+#inputModeContainer #inputModeDropdown input:checked + label {
+    background-color: wheat;
+}
+
 /* Asset Picker */
 
 #assetPicker {

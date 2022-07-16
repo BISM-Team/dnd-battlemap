@@ -1,4 +1,4 @@
-import { Vector, Transform, moveMeshTo, rotateMeshTo, scaleMeshTo, removeMesh, addMeshFromUrl, defaultHeight, TERRAIN_NAME } from './shared.mjs'
+import { Vector, Transform, moveMeshTo, rotateMeshTo, scaleMeshTo, removeMesh, addMeshFromUrl, defaultHeight, TERRAIN_NAME, createLine, removeLine } from './shared.mjs'
 
 export class Player {
     name = '';
@@ -57,7 +57,6 @@ export class Object {
     }
 
     remove(scene, manifest, counter) { 
-        console.log(manifest.loading, counter);
         if(manifest.loading != counter) {
             console.log('set remove timeout');
             setTimeout(this.remove, 300, scene, manifest, 0);
@@ -98,10 +97,63 @@ export class Object {
     }
 }
 
+export class Line {
+    owner; //Player
+    start = new Vector(0, 0, 0);
+    end = new Vector(0, 0, 0);
+    visibleToAll = true;
+    viewers = []; //Player
+
+    update(new_line, scene, player, manifest) {
+        if(new_line === undefined && manifest.findLine(this.owner) !== undefined) { this.remove(scene, manifest, 1); return; }
+        if(new_line !== undefined && manifest.findLine(this.owner) === undefined) { manifest.addLine(this); }
+        this.create(scene, new_line.start, new_line.end, new_line.owner);
+        this.show_hide(scene, new_line.visibleToAll, new_line.viewers, player);
+    }
+
+    create(scene, start, end, owner) {
+        this.start = start;
+        this.end = end;
+        if(scene) createLine(scene, start, end, owner.name);
+    }
+
+    remove(scene, manifest, counter) {
+        if(manifest.loading != counter) {
+            console.log('set remove timeout');
+            setTimeout(this.remove, 300, scene, manifest, 0);
+            return;
+        }
+        if(scene) removeLine(scene, scene.getMeshByName(this.owner.name));
+        manifest.removeLine(this.owner);
+    }
+
+    show_hide(scene, visibleToAll, viewers, player) { 
+        this.visibleToAll = visibleToAll;
+        this.viewers = viewers; 
+
+        if(scene) {
+            const line_mesh = scene.getMeshByName(this.owner.name);
+            if(this.visibleToAll || this.viewers.find(viewer => { return viewer.name == player.name; })) {
+                line_mesh.setEnabled(true);
+            } else {
+                line_mesh.setEnabled(false);
+            }
+        }
+    };
+
+    fix_protos() {
+        this.start.__proto__ = Vector.prototype;
+        this.end.__proto__ = Vector.prototype;
+        this.owner.__proto__ = Player.prototype;
+        this.viewers.forEach((viewer) => { if(viewer) viewer.__proto__ = Player.prototype; });
+    }
+}
+
 
 export class SceneManifest {
     _scene = null;
     scene = [];
+    lines = [];
     loading = 0;
     constructor(_scene) { this._scene = _scene; }
 
@@ -134,9 +186,11 @@ export class SceneManifest {
         this.loading++;
         try {
             const __scene = this.scene.concat(new_manifest.scene);
-                await Promise.all(__scene.map(async (object) => { 
-                    if(object) { await object.update(new_manifest.find(object.name), this._scene, player, this); } 
-                }));
+            const __lines = this.lines.concat(new_manifest.lines);
+            await Promise.all(__scene.map(async (object) => { 
+                if(object) { await object.update(new_manifest.find(object.name), this._scene, player, this); } 
+            }));
+            __lines.forEach(line => { if(line) { line.update(new_manifest.findLine(line.owner), this._scene, player, this); }});
         } catch(ex) {
             this.loading--;
             throw ex;
@@ -157,13 +211,46 @@ export class SceneManifest {
         return this.scene.push(object); 
     }
 
+    updateLine(owner, new_line, player) {
+        this.loading++;
+        try {
+            let line = undefined;
+            if((line = this.findLine(owner)) !== undefined) {
+                line.update(new_line, this._scene, player, this);
+            } else if(new_line !== undefined) {
+                new_line.update(new_line, this._scene, player, this)
+            } else {
+                this.loading--;
+                return console.error('Line is undefined');
+            }
+        } catch(ex) {
+            this.loading--;
+            throw ex;
+        }
+        this.loading--;
+    }
+    
+    addLine(line) {
+        if(this.findLine(line.owner)) { console.error("line already present"); return; }
+        return this.lines.push(line);
+    }
+    
+    findLine(owner) { return this.lines.find( line => {return line.owner.name == owner.name;}); }
+    findLineIndex(owner) { return this.lines.findIndex( line => {return line.owner.name == owner.name;}); }
+
+    removeLine(owner) {
+        const index = this.findLineIndex(owner); 
+        if(index != -1) { return this.lines.splice(index, 1); } 
+        else console.error('line belonging to ' + owner.name + ' not found'); 
+    }
+
     find(name) { return this.scene.find((object) => {return object && object.name == name;}); }
     findIndex(name) { return this.scene.findIndex((object) => {return object && object.name == name;}); }
     to_string() { let s=''; this.scene.forEach((obj) => { s+=(obj.name + '; '); }); return s; }
 
     remove(name) { 
         const index = this.findIndex(name); 
-        if(index != -1) { return this.scene.splice(this.findIndex(name), 1); } 
+        if(index != -1) { return this.scene.splice(index, 1); } 
         else console.error(name + ' not found'); 
     }
 
@@ -192,5 +279,6 @@ export class SceneManifest {
 
     fix_protos() {
         this.scene.forEach((object) => { if(object) { object.__proto__ = Object.prototype; object.fix_protos(); }});
+        this.lines.forEach((line) => { if(line) { line.__proto__ = Line.prototype; line.fix_protos(); }});
     }
 }
