@@ -126,9 +126,11 @@ export function createLine(scene, start, end, name) {
             sideOrientation: BABYLON.Mesh.DOUBLESIDE
         },
         scene);
+    const subtracted = end.difference(start);
+    console.log(subtracted, subtracted.length());
     const added = end.add(start);
     cylinder.position = new BABYLON.Vector3(added.x/2.0, added.y/2.0, added.z/2.0);
-    cylinder.rotation = new BABYLON.Vector3(0.0, 0.0, Math.PI/2.0);
+    cylinder.rotation = new BABYLON.Vector3(0, 0, Math.PI/2);
     cylinder.renderingGroupId = 1;
 }
 

@@ -132,7 +132,7 @@ function onJoinRoom(instance, socket) {
         new_line.fix_protos();
         socket.to(room).emit('update-line', owner, new_line);
         manifest.updateLine(owner, new_line, player);
-        console.log(instance.room + ': line updated ' + owner.name);
+        // console.log(instance.room + ': line updated ' + owner.name); // 100 times per second lol
     });
 
     socket.on('client-remove-line', (owner) => {
