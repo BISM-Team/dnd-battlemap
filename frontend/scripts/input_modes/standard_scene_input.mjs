@@ -1,6 +1,5 @@
 import { toggleShowFps, toggleShowDebug } from '../scene.mjs'
 import { Vector, Transform, TERRAIN_NAME, CAMERA_NAME, defaultHeight } from '../shared.mjs'
-import { sendRemoveObject, sendMoveObjTo, sendUpdateObject } from '../connection.mjs'
 import { manifest, onPickObj, onStartMoveObj, onUnpickObj, active_layer } from '../controller.mjs'
 
 export class StandardSceneInput {
@@ -116,7 +115,7 @@ export class StandardSceneInput {
         }
     }
 
-    onPointerUp() {
+    async onPointerUp() {
         if(this.tmpPickedObj && !this.moved) {
             onUnpickObj(this.pickedObj);
             this.pickedObj = this.tmpPickedObj;
@@ -140,9 +139,8 @@ export class StandardSceneInput {
                 const new_transform = new Transform(    endPos,
                                                         new Vector(transform.rotation.x, transform.rotation.y, transform.rotation.z), 
                                                         new Vector(transform.scaling.x, transform.scaling.y, transform.scaling.z));
-                manifest.update_single_move(this.pickedObj.name, new_transform);
-                sendMoveObjTo(this.pickedObj.name, new_transform); 
-
+                this.pickedObj.transform = new_transform;
+                await manifest.update(this.pickedObj);
             }
             const camera = manifest._scene.getCameraByName(CAMERA_NAME);
             camera.attachControl(this.canvas, true);
@@ -158,12 +156,12 @@ export class StandardSceneInput {
         this.moved = false;
     }
 
-    onKeyDown(e) {
+    async onKeyDown(e) {
         switch(e.key) {
             case this.delKeyBind:
                 if(this.pickedObj) {
                     onUnpickObj(this.pickedObj);
-                    sendRemoveObject(this.pickedObj.name);
+                    manifest.remove(this.pickedObj.name);
                     this.tmpPickedObj = null;
                     this.pickedObj = null;
                     this.moving = false;
@@ -181,22 +179,22 @@ export class StandardSceneInput {
                 
             case this.rotateRightKeyBind:
                 if(this.pickedObj)
-                    this.rotateRightObject(this.pickedObj);
+                    await this.rotateRightObject(this.pickedObj);
                 break;
 
             case this.rotateLeftKeyBind:
                 if(this.pickedObj)
-                    this.rotateLeftObject(this.pickedObj);
+                    await this.rotateLeftObject(this.pickedObj);
                 break;
             
             case this.scaleKeyBind:
                 if(this.pickedObj)
-                    this.scaleUpObject(this.pickedObj);
+                    await this.scaleUpObject(this.pickedObj);
                 break;
 
             case this.unscaleKeyBind:
                 if(this.pickedObj)
-                    this.scaleDownObject(this.pickedObj);
+                    await this.scaleDownObject(this.pickedObj);
                 break;
 
             default:
@@ -214,47 +212,46 @@ export class StandardSceneInput {
         return mesh.isPickable && (object=manifest.getObjectFromLod(mesh.name)) && object!=this.pickedObj && object.layer < active_layer; // picked objects can only interact with lower layers
     }
 
-    rotateRightObject(obj) {
+    async rotateRightObject(obj) {
         let transform = obj.transform;
         const new_transform = new Transform(    new Vector(transform.location.x, transform.location.y, transform.location.z),   
                                                 new Vector(transform.rotation.x, transform.rotation.y+this.rotationChange, transform.rotation.z), 
-                                                new Vector(transform.scaling.x, transform.scaling.y, transform.scaling.z))
-        manifest.update_single_move(obj.name, new_transform);
-        sendMoveObjTo(obj.name, new_transform);
+                                                new Vector(transform.scaling.x, transform.scaling.y, transform.scaling.z));
+        obj.transform = new_transform;
+        await manifest.update(obj);
     }
 
-    rotateLeftObject(obj) {
+    async rotateLeftObject(obj) {
         let transform = obj.transform;
         const new_transform = new Transform(    new Vector(transform.location.x, transform.location.y, transform.location.z),   
                                                 new Vector(transform.rotation.x, transform.rotation.y-this.rotationChange, transform.rotation.z), 
-                                                new Vector(transform.scaling.x, transform.scaling.y, transform.scaling.z))
-        manifest.update_single_move(obj.name, new_transform);
-        sendMoveObjTo(obj.name, new_transform);
+                                                new Vector(transform.scaling.x, transform.scaling.y, transform.scaling.z));
+        obj.transform = new_transform;
+        await manifest.update(obj);
     }
     
-    scaleUpObject(obj) {
+    async scaleUpObject(obj) {
         let transform = obj.transform;
         const new_transform = new Transform(    new Vector(transform.location.x, transform.location.y, transform.location.z),   
                                                 new Vector(transform.rotation.x, transform.rotation.y, transform.rotation.z), 
-                                                new Vector(transform.scaling.x+this.scaleChange, transform.scaling.y+this.scaleChange, transform.scaling.z+this.scaleChange))
-        manifest.update_single_move(obj.name, new_transform);
-        sendMoveObjTo(obj.name, new_transform);
+                                                new Vector(transform.scaling.x+this.scaleChange, transform.scaling.y+this.scaleChange, transform.scaling.z+this.scaleChange));
+        obj.transform = new_transform;
+        await manifest.update(obj);
     }
     
-    scaleDownObject(obj) {
+    async scaleDownObject(obj) {
         let transform = obj.transform;
         const new_transform = new Transform(    new Vector(transform.location.x, transform.location.y, transform.location.z),   
                                                 new Vector(transform.rotation.x, transform.rotation.y, transform.rotation.z), 
-                                                new Vector(transform.scaling.x-this.scaleChange, transform.scaling.y-this.scaleChange, transform.scaling.z-this.scaleChange))
-        manifest.update_single_move(obj.name, new_transform);
-        sendMoveObjTo(obj.name, new_transform);
+                                                new Vector(transform.scaling.x-this.scaleChange, transform.scaling.y-this.scaleChange, transform.scaling.z-this.scaleChange));
+        obj.transform = new_transform;
+        await manifest.update(obj);
     }
     
-    changeActiveLayer(l) {
+    async changeActiveLayer(l) {
         if(this.pickedObj && l>=0) {
             this.pickedObj.layer = l;
-            sendUpdateObject(this.pickedObj.name, this.pickedObj);
+            await manifest.update(this.pickedObj);
         }
     }
-
 }

@@ -1,7 +1,6 @@
 import { CAMERA_NAME, Vector } from '../shared.mjs'
 import { active_layer, manifest, player } from '../controller.mjs'
-import { sendCreateLine, sendRemoveLine } from '../connection.mjs';
-import { Line } from '../manifest.mjs';
+import { LineObject } from '../manifest.mjs';
 
 export class LineSceneInput {
     enabled=false;
@@ -68,18 +67,14 @@ export class LineSceneInput {
 
     }
 
-    onPointerMove(evt, pickResult) {
+    async onPointerMove(evt, pickResult) {
         if(this.moving) {
             const pick = manifest._scene.pickWithRay(pickResult.ray, this.canHit);
             if(pick.hit) {
                 this.moved = true;
                 this.lastPos = new Vector(pick.pickedPoint._x, pick.pickedPoint._y+this.lineHeight, pick.pickedPoint._z);
-                let line = new Line();
-                line.owner = player;
-                line.start = new Vector(this.startPos.x, this.startPos.y, this.startPos.z);
-                line.end = new Vector(this.lastPos.x, this.lastPos.y, this.lastPos.z);
-                manifest.updateLine(player, line, player);
-                sendCreateLine(line);
+                let obj = new LineObject(player.name, line.start, line.end, active_layer);
+                await manifest.update(obj);
             }
         }
     }
@@ -88,7 +83,7 @@ export class LineSceneInput {
         if(evt.button == 2) return;
 
         if(this.moving && this.moved) {
-            sendRemoveLine(player);
+            manifest.remove(player.name);
         }
         
         if(this.moving) this.camera.attachControl(this.canvas, true);

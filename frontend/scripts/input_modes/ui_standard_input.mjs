@@ -1,6 +1,5 @@
 import { line_scene_input, standard_scene_input } from "../input.mjs";
-import { manifest, player, players, setActiveLayer } from "../controller.mjs";
-import { sendUpdateObject } from "../connection.mjs"
+import { manifest, players, setActiveLayer } from "../controller.mjs";
 
 export class UiStandardInput {
     enabled=false;
@@ -29,7 +28,6 @@ export class UiStandardInput {
         this.inputModeChange = this.inputModeChange.bind(this);
         this.updateVisibilityDropdown = this.updateVisibilityDropdown.bind(this);
         this.checkAllBox = this.checkAllBox.bind(this);
-        this.updateObj = this.updateObj.bind(this);
         this.addOptionsPanel = this.addOptionsPanel.bind(this);
         this.removeOptionsPanel = this.removeOptionsPanel.bind(this);
     }
@@ -99,27 +97,27 @@ export class UiStandardInput {
         this.layer_selection.classList.toggle("visible");
     }
 
-    rotateBtnMouseDown(ev) {
+    async rotateBtnMouseDown(ev) {
         ev.preventDefault();
         if(this.obj)
             if(ev.button==0)
-                { if(standard_scene_input.enabled) standard_scene_input.rotateRightObject(this.obj); }
+                { if(standard_scene_input.enabled) await standard_scene_input.rotateRightObject(this.obj); }
             else if(ev.button==2)
-                { if(standard_scene_input.enabled) standard_scene_input.rotateLeftObject(this.obj); }
+                { if(standard_scene_input.enabled) await standard_scene_input.rotateLeftObject(this.obj); }
     }
 
-    scaleBtnMouseDown(ev) {
+    async scaleBtnMouseDown(ev) {
         ev.preventDefault();
         if(this.obj)
             if(ev.button==0) 
-                { if(standard_scene_input.enabled) standard_scene_input.scaleUpObject(this.obj); }
+                { if(standard_scene_input.enabled) await standard_scene_input.scaleUpObject(this.obj); }
             else if(ev.button==2)
-                { if(standard_scene_input.enabled) standard_scene_input.scaleDownObject(this.obj); }
+                { if(standard_scene_input.enabled) await standard_scene_input.scaleDownObject(this.obj); }
     }
 
-    layerSelectionChange() {
+    async layerSelectionChange() {
         const l = parseInt(this.layer_selection.value)
-        if(standard_scene_input.enabled) standard_scene_input.changeActiveLayer(l);
+        if(standard_scene_input.enabled) await standard_scene_input.changeActiveLayer(l);
         setActiveLayer(l);
     }
 
@@ -145,7 +143,7 @@ export class UiStandardInput {
 
     updateVisibilityDropdown() {
         this.visibility_dropdown.classList.toggle("visible");
-        this.check_all_box.checked = this.obj.visibleToAll;
+        this.check_all_box.checked = this.obj.visibility.visibleToAll;
         while (this.visibility_dropdown.childElementCount > 1) {
             this.visibility_dropdown.removeChild(this.visibility_dropdown.lastChild);
         }
@@ -159,24 +157,19 @@ export class UiStandardInput {
             input.type = "checkbox";
             input.name = player.player.name;
             input.value = player.player.name;
-            input.checked = this.obj.viewers.findIndex( viewer => { return viewer.name == player.player.name; }) != -1;
-            input.addEventListener("change", () => {
-                if(!input.checked) this.obj.viewers.splice(this.obj.viewers.findIndex( viewer => { return viewer.name == player.player.name; }), 1);
-                else this.obj.viewers.push(player.player);
-                this.updateObj(this.obj);
+            input.checked = this.obj.visibility.viewers.findIndex( viewer => { return viewer.name == player.player.name; }) != -1;
+            input.addEventListener("change", async () => {
+                if(!input.checked) this.obj.visibility.viewers.splice(this.obj.visibility.viewers.findIndex( viewer => { return viewer.name == player.player.name; }), 1);
+                else this.obj.visibility.viewers.push(player.player);
+                await manifest.update(this.obj);
             });
             this.visibility_dropdown.appendChild(label);
         });
     }
 
-    checkAllBox() {
-        this.obj.visibleToAll = this.check_all_box.checked;
-        this.updateObj(this.obj);
-    }
-
-    async updateObj(obj) {
-        await manifest.update_single(obj.name, obj, player);
-        sendUpdateObject(obj.name, obj);
+    async checkAllBox() {
+        this.obj.visibility.visibleToAll = this.check_all_box.checked;
+        await manifest.update(this.obj);
     }
     
     addOptionsPanel(object) {

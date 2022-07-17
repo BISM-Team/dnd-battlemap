@@ -1,10 +1,19 @@
 import { manifest, player, players, setPlayer, setPlayerList, resetScene } from './controller.mjs'
-import { SceneManifest, Object, Player, Line } from './manifest.mjs'
-import { Transform } from './shared.mjs'
+import { Manifest, Player, ObjectType } from './manifest.mjs'
 
 let socket;
 
-/* Download */
+export class Connection {
+    sendUpdateObject(new_object, conn_params) {
+        socket.emit('client-update-object', new_object);
+        console.log('send update object' + new_object.name);
+    }
+
+    sendRemoveObject(obj_name, conn_params) {
+        socket.emit('client-remove-object', obj_name);
+        console.log('send remove object ' + obj_name);
+    }
+}
 
 export function connectToRoom(room, name) {
     if(socket) socket.disconnect(true);
@@ -32,47 +41,22 @@ export function connectToRoom(room, name) {
     })
 
     socket.on('load-scene', async (url, new_manifest) => {
-        if(new_manifest) { new_manifest.__proto__ = SceneManifest.prototype; new_manifest.fix_protos(); }
+        if(new_manifest) { new_manifest.__proto__ = Manifest.prototype; new_manifest.fix_protos(); }
         resetScene();
         await BABYLON.SceneLoader.AppendAsync('', url, manifest._scene);
-        manifest.update_all(new_manifest, player);
+        await manifest.update_all(new_manifest);
         console.log('scene load client ' + url);
     });
     
-    socket.on('load-object', async (name, object) => {
-        if(object) { object.__proto__ = Object.prototype; object.fix_protos(); }
-        manifest.update_single(name, object, player);
-        console.log('client object loaded ' + name);
-    });
-    
     socket.on('remove-object', (name) => {
-        manifest.update_single(name, undefined, player);
+        manifest.remove(name, false);
         console.log('client removed object ' + name);
     });
-    
-    socket.on('move-object', (name, transform) => {
-        if(transform) { transform.__proto__ = Transform.prototype; transform.fix_protos(); }
-        manifest.update_single_move(name, transform);
-        console.log('client object moved ' + name);
-    });
 
-    socket.on('update-object', (name, new_obj) => {
-        if(new_obj) { new_obj.__proto__ = Object.prototype; new_obj.fix_protos(); }
-        manifest.update_single(name, new_obj, player);
-        console.log('client object updated ' + name);
-    });
-    
-    socket.on('update-line', (owner, new_line) => {
-        if(owner) owner.__proto__ = Player.prototype;
-        if(new_line) { new_line.__proto__ = Line.prototype; new_line.fix_protos(); }
-        manifest.updateLine(owner, new_line, player);
-        // console.log('client line updated ' + owner.name); // 100 times a second lol
-    });
-
-    socket.on('remove-line', (owner) => {
-        if(owner) owner.__proto__ = Player.prototype;
-        manifest.updateLine(owner, undefined, player);
-        console.log('client line removed ' + owner.name);
+    socket.on('update-object', async new_obj => {
+        ObjectType.fix_object_prototype(new_obj);
+        await manifest.update(new_obj, false);
+        console.log('client object updated ' + new_obj.name);
     });
     
     socket.on('connect', () => {
@@ -87,8 +71,6 @@ export function connectToRoom(room, name) {
         console.error('disconnected from server:', reason);
     });
 }
-
-/* Upload */
 
 export function localUploadMesh(file) {
     let reader = new FileReader();
@@ -118,34 +100,4 @@ export function localUploadMesh(file) {
         console.log('stream-file ' + file.name);
     }
     reader.readAsText(file);
-}
-
-export function sendLoadMeshFromUrl(filename, layer) {
-    socket.emit('client-load-object', filename, layer);
-    console.log('send load mesh ' + filename);
-}
-
-export function sendMoveObjTo(obj_name, transform) {
-    socket.emit('client-move-object', obj_name, transform);
-    console.log('send move mesh ' + obj_name);
-}
-
-export function sendRemoveObject(obj_name) {
-    socket.emit('client-remove-object', obj_name);
-    console.log('send remove mesh ' + obj_name);
-}
-
-export function sendUpdateObject(obj_name, new_object) {
-    socket.emit('client-update-object', obj_name, new_object);
-    console.log('send update mesh' + obj_name);
-}
-
-export function sendCreateLine(line) {
-    socket.emit('client-update-line', player, line);
-    // console.log('send create line'); // 100 times a second lol
-}
-
-export function sendRemoveLine() {
-    socket.emit('client-remove-line', player);
-    console.log('send remove line');
 }

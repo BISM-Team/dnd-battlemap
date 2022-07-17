@@ -1,6 +1,7 @@
 import { resetScene as _resetScene, initScene, highlightMesh, unHighlightMesh } from './scene.mjs';
-import { Player, SceneManifest } from './manifest.mjs'
 import { addStandardSceneBindings, ui_standard_input } from './input.mjs'
+import { Manifest, Player } from './manifest.mjs';
+import { Connection } from './connection.mjs';
 
 export let manifest;
 export let player;
@@ -21,7 +22,7 @@ export function setActiveLayer(l) {
 
 export function resetScene() {
     const scene = _resetScene(manifest ? manifest.scene : undefined);
-    manifest = new SceneManifest(scene);
+    manifest = new Manifest(player, new Connection(), scene);
     addStandardSceneBindings();
     initScene(scene);
 }

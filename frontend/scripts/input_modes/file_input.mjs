@@ -1,5 +1,6 @@
-import { localUploadMesh, sendLoadMeshFromUrl } from '../connection.mjs'
-import { active_layer } from '../controller.mjs'
+import { localUploadMesh } from '../connection.mjs'
+import { manifest, active_layer, player } from '../controller.mjs'
+import { LodObject } from '../manifest.mjs';
 
 export class FileInput {
     enabled=false;
@@ -70,12 +71,15 @@ export class FileInput {
         }
     }
     
-    canvasOnDrop(event) {
+    async canvasOnDrop(event) {
         event.stopPropagation();
         event.preventDefault();
         const text = event.dataTransfer.getData('text/plain');
         if(text) {
-            if(active_layer>=0) sendLoadMeshFromUrl(text, active_layer);
+            if(active_layer>=0) {
+                let obj = new LodObject(manifest.getUniqueName(player.name+text), null, text, active_layer, [player]);
+                await manifest.update(obj);
+            }
         }
     }
 }
