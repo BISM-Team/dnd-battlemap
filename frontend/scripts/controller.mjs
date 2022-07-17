@@ -6,7 +6,7 @@ import { Connection } from './connection.mjs';
 export let manifest;
 export let player;
 export let players = []; // Players
-export let active_layer = 1;
+export let active_layer = 2;
 
 export function setPlayer(name) {
     player = new Player(name);
