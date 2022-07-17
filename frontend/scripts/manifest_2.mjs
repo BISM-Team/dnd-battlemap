@@ -1,4 +1,3 @@
-import { player } from "./controller.mjs";
 import { createLine, moveMeshTo, removeMesh, rotateMeshTo, scaleMeshTo, Transform, Vector } from "./shared.mjs";
 
 export class Player {
@@ -63,7 +62,7 @@ export class LodObject {
         this.set_transform(obj.transform, manifest);
         this.layer = obj.layer;
         this.owners = obj.owners;
-        set_visibility(obj.visibility, manifest);
+        this.set_visibility(obj.visibility, manifest);
     }
 
     destroy(manifest) {
@@ -114,7 +113,7 @@ export class LineObject {
     async update(obj, manifest) {
         this.set_start_end(obj.start, obj.end, manifest);
         this.layer = obj.layer;
-        set_visibility(obj.visibility, manifest);
+        this.set_visibility(obj.visibility, manifest);
     }
 
     destroy(manifest) {
