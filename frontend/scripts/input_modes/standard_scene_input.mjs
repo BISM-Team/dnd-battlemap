@@ -1,6 +1,7 @@
-import { toggleShowFps, toggleShowDebug } from '../scene.mjs'
+import { toggleShowFps, toggleShowDebug, highlightMesh, unHighlightMesh } from '../scene.mjs'
 import { Vector, Transform, TERRAIN_NAME, CAMERA_NAME, defaultHeight } from '../shared.mjs'
-import { manifest, onPickObj, onStartMoveObj, onUnpickObj, active_layer } from '../controller.mjs'
+import { manifest, active_layer } from '../controller.mjs'
+import { ui_standard_input } from '../input.mjs';
 
 export class StandardSceneInput {
     enabled=false;
@@ -24,19 +25,12 @@ export class StandardSceneInput {
     unscaleKeyBind = 'S';
 
     constructor() {
-        this.enable = this.enable.bind(this);
-        this.disable = this.disable.bind(this);
         this.onPointerDown = this.onPointerDown.bind(this);
         this.onPointerMove = this.onPointerMove.bind(this);
         this.onPointerUp = this.onPointerUp.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
         this.canPick = this.canPick.bind(this);
         this.canHit = this.canHit.bind(this);
-        this.rotateRightObject = this.rotateRightObject.bind(this);
-        this.rotateLeftObject = this.rotateLeftObject.bind(this);
-        this.scaleUpObject = this.scaleUpObject.bind(this);
-        this.scaleDownObject = this.scaleDownObject.bind(this);
-        this.changeActiveLayer = this.changeActiveLayer.bind(this);
     }
 
     enable() {
@@ -56,7 +50,7 @@ export class StandardSceneInput {
     }
 
     disable() {
-        if(this.pickedObj) onUnpickObj(this.pickedObj);
+        if(this.pickedObj) this.onUnpickObj();
         this.pickedObj = null;
         this.tmpPickedObj = null;
         this.moving = false;
@@ -85,7 +79,7 @@ export class StandardSceneInput {
             } else {
                 this.tmpPickedObj = null; 
                 this.pickedObj = picked;
-                onPickObj(this.pickedObj);
+                this.onPickObj();
             }
             if (this.pickedObj != manifest.getObjectFromLod(TERRAIN_NAME)) {
                 this.moving = true;
@@ -95,7 +89,7 @@ export class StandardSceneInput {
             }
         }
         else {
-            if(this.pickedObj) onUnpickObj(this.pickedObj);
+            if(this.pickedObj) this.onUnpickObj();
             this.moving = false;
             this.moved = false;
             this.tmpPickedObj = null;
@@ -107,7 +101,7 @@ export class StandardSceneInput {
         if(this.moving) {
             const pick = manifest._scene.pickWithRay(pickResult.ray, this.canHit);
             if(pick.pickedMesh) {
-                if(!this.moved) onStartMoveObj(this.pickedObj);
+                if(!this.moved) this.onStartMoveObj();
                 this.moved = true;
                 pick.pickedPoint._y += this.pickHeight;
                 manifest._scene.getMeshByName(this.pickedObj.lodNames[0]).position = new BABYLON.Vector3(pick.pickedPoint._x, pick.pickedPoint._y, pick.pickedPoint._z);
@@ -117,10 +111,10 @@ export class StandardSceneInput {
 
     async onPointerUp() {
         if(this.tmpPickedObj && !this.moved) {
-            onUnpickObj(this.pickedObj);
+            this.onUnpickObj()
             this.pickedObj = this.tmpPickedObj;
             this.tmpPickedObj = null;
-            onPickObj(this.pickedObj);
+            this.onPickObj();
             if (this.pickedObj != manifest.getObjectFromLod(TERRAIN_NAME)) {
                 this.moving = true;
                 this.moved = false;
@@ -144,7 +138,7 @@ export class StandardSceneInput {
             }
             const camera = manifest._scene.getCameraByName(CAMERA_NAME);
             camera.attachControl(this.canvas, true);
-            onUnpickObj(this.pickedObj);
+            this.onUnpickObj();
             this.tmpPickedObj = null;
             this.pickedObj = null;
         }
@@ -160,7 +154,7 @@ export class StandardSceneInput {
         switch(e.key) {
             case this.delKeyBind:
                 if(this.pickedObj) {
-                    onUnpickObj(this.pickedObj);
+                    this.onUnpickObj()
                     manifest.remove(this.pickedObj.name);
                     this.tmpPickedObj = null;
                     this.pickedObj = null;
@@ -253,5 +247,23 @@ export class StandardSceneInput {
             this.pickedObj.layer = l;
             await manifest.update(this.pickedObj);
         }
+    }
+
+    onPickObj() {
+        this.pickedObj.lodNames.forEach(name => {
+            highlightMesh(manifest._scene.getMeshByName(name));
+        });
+        if(ui_standard_input.enabled) ui_standard_input.addOptionsPanel(this.pickedObj);
+    }
+    
+    onStartMoveObj() {
+        if(ui_standard_input.enabled) ui_standard_input.removeOptionsPanel();
+    }
+    
+    onUnpickObj() {
+        this.pickedObj.lodNames.forEach(name => {
+            unHighlightMesh(manifest._scene.getMeshByName(name));
+        });
+        if(ui_standard_input.enabled) ui_standard_input.removeOptionsPanel();
     }
 }

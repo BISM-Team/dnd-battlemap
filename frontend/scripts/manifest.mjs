@@ -98,7 +98,10 @@ export class LineObject {
     set_start_end(start, end, manifest) {
         this.start = start;
         this.end = end;
-        if(manifest._scene) createLine(manifest._scene, this.start, this.end, this.name);
+        if(manifest._scene) {
+            this.destroy(manifest);
+            createLine(manifest._scene, this.start, this.end, this.name);
+        }
     }
 
     set_visibility(v, manifest) {
@@ -120,7 +123,10 @@ export class LineObject {
     }
 
     destroy(manifest) {
-        if(manifest._scene) removeMesh(manifest._scene, manifest._scene.getMeshByName(this.name));
+        if(manifest._scene) {
+            const mesh = manifest._scene.getMeshByName(this.name);
+            if(mesh) removeMesh(manifest._scene, mesh);
+        }
     }
 
     fix_protos() {

@@ -18,16 +18,14 @@ export class UiStandardInput {
     object_control_buttons;
 
     constructor() {
-        this.enable = this.enable.bind(this);
-        this.disable = this.disable.bind(this);
         this.layerBtnMouseDown = this.layerBtnMouseDown.bind(this);
         this.inputModeBtnMouseDown = this.inputModeBtnMouseDown.bind(this);
         this.rotateBtnMouseDown = this.rotateBtnMouseDown.bind(this);
         this.scaleBtnMouseDown = this.scaleBtnMouseDown.bind(this);
         this.layerSelectionChange = this.layerSelectionChange.bind(this);
         this.inputModeChange = this.inputModeChange.bind(this);
-        this.updateVisibilityDropdown = this.updateVisibilityDropdown.bind(this);
-        this.checkAllBox = this.checkAllBox.bind(this);
+        this.visibilityBtnMouseDown = this.visibilityBtnMouseDown.bind(this);
+        this.checkAllBoxChange = this.checkAllBoxChange.bind(this);
         this.addOptionsPanel = this.addOptionsPanel.bind(this);
         this.removeOptionsPanel = this.removeOptionsPanel.bind(this);
     }
@@ -53,11 +51,11 @@ export class UiStandardInput {
         this.layer_btn.addEventListener("mousedown", this.layerBtnMouseDown);
         this.rotate_btn.addEventListener("mousedown", this.rotateBtnMouseDown);
         this.scale_btn.addEventListener("mousedown", this.scaleBtnMouseDown);
-        this.visibility_btn.addEventListener("mousedown", this.updateVisibilityDropdown);
+        this.visibility_btn.addEventListener("mousedown", this.visibilityBtnMouseDown);
         this.input_mode_btn.addEventListener("mousedown", this.inputModeBtnMouseDown);
         this.layer_selection.addEventListener("change", this.layerSelectionChange);
         this.input_mode_selection.forEach(selection => selection.addEventListener("change", this.inputModeChange));
-        this.check_all_box.addEventListener("change", this.checkAllBox);
+        this.check_all_box.addEventListener("change", this.checkAllBoxChange);
 
         this.enabled = true;
     }
@@ -71,11 +69,11 @@ export class UiStandardInput {
         this.layer_btn.removeEventListener("mousedown", this.layerBtnMouseDown);
         this.rotate_btn.removeEventListener("mousedown", this.rotateBtnMouseDown);
         this.scale_btn.removeEventListener("mousedown", this.scaleBtnMouseDown);
-        this.visibility_btn.removeEventListener("mousedown", this.updateVisibilityDropdown);
+        this.visibility_btn.removeEventListener("mousedown", this.visibilityBtnMouseDown);
         this.input_mode_btn.removeEventListener("mousedown", this.inputModeBtnMouseDown);
         this.layer_selection.removeEventListener("change", this.layerSelectionChange);
         this.input_mode_selection.forEach(selection => selection.removeEventListener("change", this.inputModeChange));
-        this.check_all_box.removeEventListener("change", this.checkAllBox);
+        this.check_all_box.removeEventListener("change", this.checkAllBoxChange);
 
         this.layer_btn = null;
         this.rotate_btn = null;
@@ -141,7 +139,7 @@ export class UiStandardInput {
         }
     }
 
-    updateVisibilityDropdown() {
+    visibilityBtnMouseDown() {
         this.visibility_dropdown.classList.toggle("visible");
         this.check_all_box.checked = this.obj.visibility.visibleToAll;
         while (this.visibility_dropdown.childElementCount > 1) {
@@ -167,7 +165,7 @@ export class UiStandardInput {
         });
     }
 
-    async checkAllBox() {
+    async checkAllBoxChange() {
         this.obj.visibility.visibleToAll = this.check_all_box.checked;
         await manifest.update(this.obj);
     }

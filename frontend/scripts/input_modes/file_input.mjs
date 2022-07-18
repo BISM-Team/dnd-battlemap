@@ -8,8 +8,6 @@ export class FileInput {
     fileInputs;
 
     constructor() {
-        this.enable = this.enable.bind(this);
-        this.disable = this.disable.bind(this);
         this.fileInputOnDragOver = this.fileInputOnDragOver.bind(this);
         this.fileInputOnDrop = this.fileInputOnDrop.bind(this);
         this.fileInputOnChange = this.fileInputOnChange.bind(this);

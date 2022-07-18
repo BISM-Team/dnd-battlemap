@@ -1,4 +1,4 @@
-import * as connectionJs from './scripts/connection.mjs';
+import * as controllerJs from './scripts/controller.mjs';
 import './scripts/scene.mjs';
 import './scripts/input.mjs';
 
@@ -15,7 +15,7 @@ const name = params.get('name');
 
 if(room && name) {
     console.log('connecting to room ' + room + ' as ' + name);
-    connectionJs.connectToRoom(room, name);
+    controllerJs.connectToRoom(room, name);
     updateAssets();
 } else {
     throw new Error('room or name not specified');

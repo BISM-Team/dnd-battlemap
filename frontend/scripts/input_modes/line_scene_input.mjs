@@ -15,12 +15,9 @@ export class LineSceneInput {
     lastPos;
 
     constructor() {
-        this.enable = this.enable.bind(this);
-        this.disable = this.disable.bind(this);
         this.onPointerDown = this.onPointerDown.bind(this);
         this.onPointerMove = this.onPointerMove.bind(this);
         this.onPointerUp = this.onPointerUp.bind(this);
-        this.canHit = this.canHit.bind(this);
     }
     
     enable() {

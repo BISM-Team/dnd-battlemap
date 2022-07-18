@@ -116,9 +116,7 @@ export function scaleMeshTo(scene, mesh, target) {
 }
 
 export function createLine(scene, start, end, name) {
-    let cylinder = scene.getMeshByName(name);
-    if(cylinder) removeLine(scene, cylinder);
-    cylinder =  BABYLON.MeshBuilder.CreateCylinder( name, 
+    let cylinder =  BABYLON.MeshBuilder.CreateCylinder( name, 
         { 
             height: end.difference(start).length(),
             diameter: 1.0,
@@ -132,10 +130,6 @@ export function createLine(scene, start, end, name) {
     cylinder.position = new BABYLON.Vector3(added.x/2.0, added.y/2.0, added.z/2.0);
     cylinder.rotation = new BABYLON.Vector3(0, 0, Math.PI/2);
     cylinder.renderingGroupId = 1;
-}
-
-export function removeLine(scene, mesh) {
-    scene.removeMesh(mesh);
 }
 
 export function removeMesh(scene, mesh) {
