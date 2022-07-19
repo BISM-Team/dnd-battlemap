@@ -3,11 +3,7 @@ export const engine = new BABYLON.Engine(canvas, true, { stencil: true });
 const divFps = document.getElementById("fps");
 BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING;
 BABYLON.Database.IDBStorageEnabled = true;
-
-let h_layer;
-let guiTex;
-
-import { defaultHeight, CAMERA_NAME } from './shared.mjs'
+import { defaultHeight, CAMERA_NAME, setSceneGuiAndHighlightLayers } from './shared.mjs'
 
 export function initScene(scene) {
     scene.collisionsEnabled = true;
@@ -35,33 +31,16 @@ export function initScene(scene) {
 
 export function resetScene(scene) {
     if(scene) scene.dispose();
-    if(h_layer) h_layer.dispose();
-    if(guiTex) guiTex.dispose();
 
     const _scene = new BABYLON.Scene(engine);
-    h_layer = new BABYLON.HighlightLayer("h_layer", _scene);
-    guiTex = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("GUI");
+    let h_layer = new BABYLON.HighlightLayer("h_layer", _scene);
+    let guiTex = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("GUI");
+    setSceneGuiAndHighlightLayers(h_layer, guiTex);
     return _scene;
-}
-
-export function highlightMesh(mesh) {
-    h_layer.addMesh(mesh, BABYLON.Color3.White());
-}
-
-export function unHighlightMesh(mesh) {
-    h_layer.removeMesh(mesh);
 }
 
 export function toggleShowFps() {
     divFps.hidden = !divFps.hidden;
-}
-
-export function addGuiControl(control) {
-    guiTex.addControl(control);
-}
-
-export function removeGuiControl(control) {
-    guiTex.removeControl(control);
 }
 
 let showDebug = false;

@@ -1,20 +1,18 @@
 import { manifest, player, players, setPlayer, setPlayerList, resetScene } from './controller.mjs'
 import { Manifest, Player, ObjectType } from './manifest.mjs'
 
-let socket;
-
 export class Connection {
     socket;
 
     sendUpdateObject(new_object, conn_params) {
         const dump_obj = false;
         this.socket.emit('client-update-object', new_object);
-        console.log('send update object' + (dump_obj ? JSON.stringify(new_object) : new_object.name));
+        console.log('send update object ' + (dump_obj ? JSON.stringify(new_object) : '\"' + new_object.name + '\"'));
     }
 
     sendRemoveObject(obj_name, conn_params) {
         this.socket.emit('client-remove-object', obj_name);
-        console.log('send remove object ' + obj_name);
+        console.log('send remove object \"' + obj_name + '\"');
     }
 
     connectToRoom(room, name) {

@@ -70,7 +70,7 @@ export class LineSceneInput {
             if(pick.hit) {
                 this.moved = true;
                 this.lastPos = new Vector(pick.pickedPoint._x, pick.pickedPoint._y+this.lineHeight, pick.pickedPoint._z);
-                let obj = new LineObject(player.name, line.start, line.end, active_layer);
+                let obj = new LineObject(player.name, this.startPos, this.lastPos, active_layer);
                 await manifest.update(obj);
             }
         }
@@ -93,6 +93,6 @@ export class LineSceneInput {
     
     canHit(mesh) {
         let object;
-        return mesh.isPickable && (object=manifest.getObjectFromLod(mesh.name)) && object!=this.pickedObj && object.layer < active_layer; // picked objects can only interact with lower layers
+        return mesh.isPickable && (object=manifest.getObjectFromLod(mesh.name)) && object.layer < active_layer; // picked objects can only interact with lower layers
     }
 }

@@ -93,15 +93,15 @@ function onJoinRoom(instance, socket) {
     console.log(instance.room +': client connected');
     socket.emit('load-scene', SCENE_LOC, filterJustScene(manifest));
 
-    socket.on('client-remove-object', (name) => {
+    socket.on('client-remove-object', name => {
         manifest.remove(name, true, [socket]);
-        console.log(instance.room +': removed object ' + name);
+        console.log(instance.room +': removed object \"' + name + '\"');
     });
 
     socket.on('client-update-object', async new_object => {
         ObjectType.fix_object_prototype(new_object);
         await manifest.update(new_object, true, [socket]);
-        console.log(instance.room + ': object updated ' + new_object.name);
+        console.log(instance.room + ': object updated \"' + new_object.name + '\"');
     });
 
     socket.on('disconnect', (reason) => {

@@ -1,4 +1,13 @@
-import { addMeshFromUrl, createLine, moveMeshTo, removeMesh, rotateMeshTo, scaleMeshTo, Transform, Vector, defaultHeight } from "./shared.mjs";
+import { addMeshFromUrl, createLine, moveMeshTo, removeMesh, rotateMeshTo, scaleMeshTo, Transform, Vector, defaultHeight, addGuiLabelLinked, removeGuiControl } from "./shared.mjs";
+
+function filterInKeys(object, keys=['']) {
+    return Object.keys(object)
+    .filter(key => {return keys.find( _key => {return _key==key});})
+    .reduce((obj, key) => {
+      obj[key] = object[key];
+      return obj;
+    }, {});
+}
 
 export class Player {
     name = '';
@@ -73,6 +82,10 @@ export class LodObject {
         if(manifest._scene) this.lodNames.forEach((_name) => { removeMesh(manifest._scene, manifest._scene.getMeshByName(_name)); });
     }
 
+    filtered() {
+        return this;
+    }
+
     fix_protos() {
         this.transform.__proto__ = Transform.prototype; this.transform.fix_protos();
         this.visibility.viewers.forEach((viewer) => { if(viewer) viewer.__proto__ = Player.prototype; });
@@ -86,6 +99,7 @@ export class LineObject {
     start;
     end;
     visibility;
+    _options;
 
     constructor(name, start = null, end = null, layer = -1, visibility = {visibleToAll: true, viewers: []}) {
         this.name = name;
@@ -93,14 +107,15 @@ export class LineObject {
         this.end = end ? end : new Vector(0, 0, 0);
         this.layer = layer;
         this.visibility = visibility;
+        this._options=null;
     }
 
     set_start_end(start, end, manifest) {
         this.start = start;
         this.end = end;
         if(manifest._scene) {
-            this.destroy(manifest);
-            createLine(manifest._scene, this.start, this.end, this.name);
+            this._options = createLine(manifest._scene, this.start, this.end, this.name, this._options);
+            addGuiLabelLinked(manifest._scene, this.name, Math.round(this.end.difference(this.start).length()) + 'ft.');
         }
     }
 
@@ -125,8 +140,15 @@ export class LineObject {
     destroy(manifest) {
         if(manifest._scene) {
             const mesh = manifest._scene.getMeshByName(this.name);
-            if(mesh) removeMesh(manifest._scene, mesh);
+            if(mesh) {
+                removeGuiControl(this.name);
+                removeMesh(manifest._scene, mesh);
+            }
         }
+    }
+
+    filtered() {
+        return filterInKeys(this, ["type", "name", "start", "end", "visibility"]);
     }
 
     fix_protos() {
@@ -164,7 +186,7 @@ export class Manifest {
             this.add(object);
         }
         await object.update(obj, this);
-        if(replicate) this.connection.sendUpdateObject(object, conn_params);
+        if(replicate) this.connection.sendUpdateObject(object.filtered(), conn_params);
     }
 
     remove(name, replicate=true, conn_params=[]) {

@@ -1,5 +1,5 @@
-import { toggleShowFps, toggleShowDebug, highlightMesh, unHighlightMesh } from '../scene.mjs'
-import { Vector, Transform, TERRAIN_NAME, CAMERA_NAME, defaultHeight } from '../shared.mjs'
+import { toggleShowFps, toggleShowDebug } from '../scene.mjs'
+import { Vector, Transform, TERRAIN_NAME, CAMERA_NAME, defaultHeight, highlightMesh, unHighlightMesh } from '../shared.mjs'
 import { manifest, active_layer } from '../controller.mjs'
 import { ui_standard_input } from '../input.mjs';
 

@@ -4,6 +4,16 @@ export const SUN_NAME = 'Sun';
 
 export let defaultHeight = 0.6;
 
+let h_layer;
+let guiTex;
+
+export function setSceneGuiAndHighlightLayers(_h_layer, _guiTex) { 
+    if(h_layer) h_layer.dispose();
+    if(guiTex) guiTex.dispose();
+    h_layer = _h_layer;
+    guiTex = _guiTex;
+}
+
 export class Vector {
     constructor (x, y, z) { this.x = x; this.y=y; this.z=z; }
 
@@ -12,6 +22,7 @@ export class Vector {
     length() { return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2)) }
 
     isEqual(other) { return this.x == other.x && this.y==other.y && this.z==other.z;}
+    toBabylonVec() { return new BABYLON.Vector3(this.x, this.y, this.z); }
 }
 
 export class Transform {
@@ -53,17 +64,36 @@ export class ScalingAnimation {
     }
 }
 
+export function getPbrDefaultMaterial(scene) {
+    let mat = scene.getMaterialByName("PBRMat");
+    if(!mat) {
+        mat = new BABYLON.PBRMaterial("PBRMat", scene);
+        mat.albedoColor = new BABYLON.Color3(0.65, 0.65, 0.65);
+        mat.metallic = 0.0;
+        mat.roughness = 0.5;
+        mat.clearCoat.isEnabled = true;
+    }
+    return mat;
+}
+
+export function getPbrDefaultMaterialRed(scene, _new=false) {
+    let mat = scene.getMaterialByName("PBRMatRed");
+    if(!mat) {
+        mat = new BABYLON.PBRMaterial("PBRMatRed", scene);
+        mat.albedoColor = new BABYLON.Color3.Red();
+        mat.metallic = 0.0;
+        mat.roughness = 0.5;
+        mat.clearCoat.isEnabled = true;
+    }
+    return mat;
+}
+
 export async function addMeshFromUrl(scene, url, lodNames) {
     let result = (await BABYLON.SceneLoader.ImportMeshAsync('', '', url, scene, null, '.babylon'));
     buildLods(sortMeshes(result.meshes), scene);
     for(let i in result.meshes) {
         if(!result.meshes[i].material) {
-            let mat = new BABYLON.PBRMaterial("PBRMat", scene);
-            mat.albedoColor = new BABYLON.Color3(0.65, 0.65, 0.65);
-            mat.metallic = 0.0;
-            mat.roughness = 0.5;
-            mat.clearCoat.isEnabled = true;
-            result.meshes[i].material = mat;
+            result.meshes[i].material = getPbrDefaultMaterial(scene);
         } else if(result.meshes[i].material.subMaterials) {
             for(let m in result.meshes[i].material.subMaterials) {
                 result.meshes[i].material.subMaterials[m].ambientColor = new BABYLON.Color3(1, 1, 1);
@@ -115,21 +145,60 @@ export function scaleMeshTo(scene, mesh, target) {
     }
 }
 
-export function createLine(scene, start, end, name) {
-    let cylinder =  BABYLON.MeshBuilder.CreateCylinder( name, 
-        { 
-            height: end.difference(start).length(),
-            diameter: 1.0,
-            updatable: true,
-            sideOrientation: BABYLON.Mesh.DOUBLESIDE
-        },
-        scene);
+export function createLine(scene, start, end, name, _options) {
     const subtracted = end.difference(start);
-    console.log(subtracted, subtracted.length());
-    const added = end.add(start);
-    cylinder.position = new BABYLON.Vector3(added.x/2.0, added.y/2.0, added.z/2.0);
-    cylinder.rotation = new BABYLON.Vector3(0, 0, Math.PI/2);
+    const arrowHeadMaxSize = 0.6;
+    const arrowRadius = 0.2;
+
+    let cylinder;
+    if(_options && _options.instance) {
+        const end_vec = new BABYLON.Vector3(subtracted.length(), 0.0, 0.0);
+        const abe_vec = new BABYLON.Vector3(subtracted.length()-(arrowHeadMaxSize*2.0), 0.0, 0.0);
+        _options.path[2] = abe_vec;
+        _options.path[3] = abe_vec;
+        _options.path[4] = end_vec;
+        cylinder = BABYLON.MeshBuilder.ExtrudeShapeCustom(null, _options, null);
+    } else {
+        let shape = [];
+        let path = [];
+        const subdivisions = 30;
+        const deltaAngle = 2.0*Math.PI/subdivisions;
+        for (let i=0; i<=subdivisions; i++) {
+            shape.push(new BABYLON.Vector3(arrowRadius*Math.cos(i*deltaAngle), arrowRadius*Math.sin(i*deltaAngle), 0))
+        }
+
+        const zero = BABYLON.Vector3.Zero();
+        const end_vec = new BABYLON.Vector3(subtracted.length(), 0.0, 0.0);
+        const abe_vec = new BABYLON.Vector3(subtracted.length()-(arrowHeadMaxSize*2.0), 0.0, 0.0);
+        path.push(zero);
+        path.push(zero);
+        path.push(abe_vec);
+        path.push(abe_vec);
+        path.push(end_vec);
+
+        const scaling = (index, distance) => {
+            switch (index) {
+                case 0:
+                    return 0;
+                case 1: 
+                    return 1;
+                case 2: 
+                    return 1;
+                case 3:
+                    return arrowHeadMaxSize / arrowRadius;
+                case 4:
+                    return 0;
+            }
+        };
+        _options = { shape: shape, path: path, scaleFunction: scaling, updatable: true, sideOrientation: BABYLON.Mesh.DOUBLESIDE }
+        cylinder = BABYLON.MeshBuilder.ExtrudeShapeCustom(name, _options, scene);
+    }
+    cylinder.material = getPbrDefaultMaterialRed(scene);
+    cylinder.position = new BABYLON.Vector3(start.x, start.y, start.z);
+    cylinder.rotation = new BABYLON.Vector3(0, Math.atan2(-subtracted.z/subtracted.length(), subtracted.x/subtracted.length()), Math.asin(subtracted.y/subtracted.length()));
     cylinder.renderingGroupId = 1;
+    _options.instance = cylinder;
+    return _options;
 }
 
 export function removeMesh(scene, mesh) {
@@ -171,4 +240,33 @@ export function uniqueRename(mesh, scene) {
         index++;
     }
     mesh.name = name;
+}
+
+export function removeGuiControl(name) {
+    let control = guiTex.getControlByName(name);
+    if(control) guiTex.removeControl(control);
+}
+
+export function addGuiLabelLinked(scene, name, text) {
+    let mesh = scene.getMeshByName(name);
+    let label = guiTex.getControlByName(name);
+    if(!mesh) { console.error('Cannot find \"' + name + '\" mesh to link to'); };
+    if(!label) {
+        label = new BABYLON.GUI.TextBlock(name, text);
+        label.fontSize = 20;
+        label.color = "Red";
+        label.linkOffsetY = -100;
+        guiTex.addControl(label);
+        label.linkWithMesh(mesh);
+    } else {
+        label.text = text;
+    }
+}
+
+export function highlightMesh(mesh) {
+    h_layer.addMesh(mesh, BABYLON.Color3.White());
+}
+
+export function unHighlightMesh(mesh) {
+    h_layer.removeMesh(mesh);
 }
