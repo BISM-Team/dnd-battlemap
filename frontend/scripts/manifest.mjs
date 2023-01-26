@@ -2,7 +2,16 @@ import { addMeshFromUrl, createLine, moveMeshTo, removeMesh, rotateMeshTo, scale
 
 function filterInKeys(object, keys=['']) {
     return Object.keys(object)
-    .filter(key => {return keys.find( _key => {return _key==key});})
+    .filter(key => {return keys.findIndex( _key => {return _key==key}) != -1;}) // include every key found in "keys"
+    .reduce((obj, key) => {
+      obj[key] = object[key];
+      return obj;
+    }, {});
+}
+
+function filterOutKeys(object, keys=['']) {
+    return Object.keys(object)
+    .filter(key => {return keys.findIndex( _key => {return _key==key}) == -1;}) // include every key not found in "keys"
     .reduce((obj, key) => {
       obj[key] = object[key];
       return obj;
@@ -34,7 +43,7 @@ export class LodObject {
     }
 
     async set_mesh_url(meshUrl, manifest) {
-        if(this.meshUrl == meshUrl) return;
+        if(this.meshUrl == meshUrl || meshUrl == '') return;
         if(this.lodNames.length > 0) { this.destroy(manifest); this.lodNames = []; }
         this.meshUrl = meshUrl;
         if(manifest._scene) {
@@ -49,7 +58,7 @@ export class LodObject {
     }
 
     set_transform(new_transform, manifest) {
-        if(new_transform.isEqual(new Transform(new Vector(0, 0, 0), new Vector(0, 0, 0), new Vector(0, 0, 0)))) return;
+        if(this.transform.isEqual(new_transform) || new_transform.isEqual(new Transform(new Vector(0, 0, 0), new Vector(0, 0, 0), new Vector(0, 0, 0)))) return;
         this.transform = new_transform;
         if(manifest._scene) {
             const mesh = manifest._scene.getMeshByName(this.lodNames[0]);
@@ -60,6 +69,7 @@ export class LodObject {
     }
 
     set_visibility(v, manifest) {
+        if(this.visibility == v || v == {visibleToAll: true, viewers: []}) return;
         this.visibility = v;
         if(manifest._scene) {
             if(this.visibility.visibleToAll || this.visibility.viewers.find(viewer => { return viewer.name == manifest.player.name; })) {
@@ -111,6 +121,7 @@ export class LineObject {
     }
 
     set_start_end(start, end, manifest) {
+        if((this.start.isEqual(start) && this.end.isEqual(end)) || (start.isEqual(new Vector(0, 0, 0)) && end.isEqual(new Vector(0, 0, 0)))) return;
         this.start = start;
         this.end = end;
         if(manifest._scene) {
@@ -120,6 +131,7 @@ export class LineObject {
     }
 
     set_visibility(v, manifest) {
+        if(this.visibility == v || v == {visibleToAll: true, viewers: []}) return;
         this.visibility = v;
         if(manifest._scene) {
             const line_mesh = manifest._scene.getMeshByName(this.name);
@@ -148,7 +160,7 @@ export class LineObject {
     }
 
     filtered() {
-        return filterInKeys(this, ["type", "name", "start", "end", "visibility"]);
+        return filterOutKeys(this, ["_options"]);
     }
 
     fix_protos() {
@@ -200,13 +212,14 @@ export class Manifest {
     }
 
     async update_all(new_manifest) {
-        const __scene = this.scene.concat(new_manifest.scene);
-        await Promise.all(__scene.map( async object => { 
-            if(object) { 
-                if(this.find(object.name) && !new_manifest.find(object.name))
-                    { this.remove(object.name, false); return; }
-                await this.update(new_manifest.find(object.name), false); 
-            } 
+        const uniqueNames = this.scene.map(obj => { return obj.name; })
+                                      .concat(new_manifest.scene.map(obj => { return obj.name; }))
+                                      .filter((name, index, self) => { return self.indexOf(name) === index; });
+        await Promise.all(uniqueNames.map(async name => { 
+            let new_obj = new_manifest.find(name);
+            if(!new_obj && this.find(name))
+                { this.remove(name, false); return; }
+            return await this.update(new_obj, false); 
         }));
     }
 

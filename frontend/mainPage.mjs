@@ -25,7 +25,7 @@ function joinRoom() {
         const url = new URL('campaign.html', location);
         url.searchParams.append('room', room);
         url.searchParams.append('name', name);
-        var win = window.open(url);
+        var win = window.open(url, '_self');
         win.focus();
     }
 }

@@ -1,9 +1,11 @@
-const canvas = document.getElementById("renderCanvas");
-export const engine = new BABYLON.Engine(canvas, true, { stencil: true });
-const divFps = document.getElementById("fps");
-BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING;
-BABYLON.Database.IDBStorageEnabled = true;
 import { defaultHeight, CAMERA_NAME, setSceneGuiAndHighlightLayers } from './shared.mjs'
+
+const canvas = document.getElementById("renderCanvas");
+const divFps = document.getElementById("fps");
+export const engine = new BABYLON.Engine(canvas, true, { stencil: true });
+BABYLON.SceneLoader.loggingLevel = BABYLON.SceneLoader.DETAILED_LOGGING;
+BABYLON.SceneLoader.ShowLoadingScreen = true;
+BABYLON.Database.IDBStorageEnabled = true;
 
 export function initScene(scene) {
     scene.collisionsEnabled = true;
@@ -30,7 +32,7 @@ export function initScene(scene) {
 }
 
 export function resetScene(scene) {
-    if(scene) scene.dispose();
+    if(scene) { scene.dispose(); engine.stopRenderLoop(); }
 
     const _scene = new BABYLON.Scene(engine);
     let h_layer = new BABYLON.HighlightLayer("h_layer", _scene);
