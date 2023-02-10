@@ -1,5 +1,5 @@
 {
-  "name": "DnDBattlemap",
+  "name": "dnd-battlemap",
   "version": "1.0.0",
   "description": "",
   "main": "./backend/app.mjs",
